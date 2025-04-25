@@ -5,199 +5,34 @@
   <meta charset="UTF-8">
   <title>IBK 대기번호 발급</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#003e8a" />
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', function () {
-        navigator.serviceWorker.register('service-worker.js').then(
-          function (registration) {
-            console.log('ServiceWorker 등록 성공:', registration.scope);
-          },
-          function (err) {
-            console.log('ServiceWorker 등록 실패:', err);
-          }
-        );
-      });
-    }
-  </script>
   <style>
     body {
       font-family: 'Noto Sans KR', sans-serif;
       background-color: #f4f6f9;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 40px;
-    }
-    .header-buttons {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 20px;
-    }
-    .header-buttons button {
-      background-color: #003e8a;
-      color: white;
-      font-size: 1em;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-    .container {
-      background-color: white;
-      padding: 40px;
-      border-radius: 20px;
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-      max-width: 1200px;
-      width: 100%;
-      display: flex;
-      flex-direction: row;
-      gap: 40px;
-    }
-    .left-panel, .right-panel {
-      flex: 1;
-    }
-    h2 {
+      padding: 20px;
       text-align: center;
-      color: #003e8a;
     }
-    .service-buttons {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-around;
-      gap: 20px;
-      margin-top: 20px;
+    .button-bar {
+      margin-bottom: 30px;
     }
-    .service-button {
-      flex: 1 1 40%;
-      padding: 30px;
-      font-size: 1.5em;
-      text-align: center;
-      border-radius: 12px;
-      background-color: #e0ecff;
-      color: #003e8a;
-      cursor: pointer;
-      border: 2px solid #003e8a;
-    }
-    .service-button.selected {
-      background-color: #003e8a;
-      color: white;
-    }
-    label, input, button {
-      width: 100%;
-      font-size: 1.2em;
-      margin-top: 20px;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-    button.submit {
+    .button-bar button {
+      margin: 10px;
+      padding: 15px 30px;
       background-color: #003e8a;
       color: white;
       border: none;
+      border-radius: 8px;
+      font-size: 1em;
       cursor: pointer;
-    }
-    button.submit:hover {
-      background-color: #002766;
-    }
-    .ticket {
-      margin-top: 20px;
-      font-size: 1.2em;
-      color: green;
-    }
-    .list {
-      margin-top: 40px;
-    }
-    .list h3 {
-      color: #333;
-      border-bottom: 1px solid #ccc;
-      padding-bottom: 8px;
-    }
-    ul {
-      list-style: none;
-      padding-left: 0;
-    }
-    li {
-      padding: 6px 0;
-      border-bottom: 1px solid #eee;
-      font-size: 1em;
-    }
-    .count {
-      font-size: 1em;
-      color: #555;
-      margin-bottom: 10px;
-      text-align: right;
     }
   </style>
 </head>
 <body>
-  <h2>📱 IBK 대기번호 발급 시스템</h2>
-
-  <div class="header-buttons">
-    <button onclick="location.href='temi-exchange-view.html'">💱 실시간 환율 보기</button>
-    <button onclick="alert('📰 뉴스 보기 기능은 곧 추가됩니다!')">📰 뉴스 보기</button>
+  <h1>📱 IBK 대기번호 발급 시스템</h1>
+  <div class="button-bar">
+    <button onclick="window.location.href='temi-exchange-view.html'">💱 실시간 환율 보기</button>
+    <button onclick="alert('📰 뉴스 페이지는 준비 중입니다!')">📰 뉴스 보기</button>
   </div>
-
-  <div class="container">
-    <div class="left-panel">
-      <div class="service-buttons">
-        <div class="service-button" onclick="selectService('예금')">예금</div>
-        <div class="service-button" onclick="selectService('적금')">적금</div>
-        <div class="service-button" onclick="selectService('대출')">대출</div>
-        <div class="service-button" onclick="selectService('카드')">카드</div>
-      </div>
-    </div>
-    <div class="right-panel">
-      <label for="phone">전화번호</label>
-      <input type="tel" id="phone" placeholder="010-1234-5678">
-      <input type="hidden" id="service">
-      <button class="submit" onclick="issueTicket()">대기번호 받기</button>
-      <div class="ticket" id="ticketDisplay"></div>
-      <div class="list">
-        <h3>🧾 대기자 리스트</h3>
-        <div class="count" id="waitingCount">현재 대기 인원: 0명</div>
-        <ul id="queueList"></ul>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    let ticketNumber = 100;
-    const queue = [];
-
-    function selectService(service) {
-      document.getElementById('service').value = service;
-      document.querySelectorAll('.service-button').forEach(btn => btn.classList.remove('selected'));
-      const buttons = document.querySelectorAll('.service-button');
-      buttons.forEach(btn => {
-        if (btn.textContent === service) {
-          btn.classList.add('selected');
-        }
-      });
-    }
-
-    function issueTicket() {
-      const phone = document.getElementById('phone').value;
-      const service = document.getElementById('service').value;
-      const display = document.getElementById('ticketDisplay');
-      const queueList = document.getElementById('queueList');
-      const waitingCount = document.getElementById('waitingCount');
-
-      if (!phone || !service) {
-        alert("전화번호와 업무를 모두 입력해주세요.");
-        return;
-      }
-
-      ticketNumber++;
-      const maskedPhone = phone.slice(0, 3) + '-****-' + phone.slice(-4);
-      const ticket = `${ticketNumber}번 | ${maskedPhone} | ${service}`;
-      queue.push(ticket);
-
-      display.innerHTML = `✅ ${maskedPhone} 고객님<br>🧾 ${service} 대기번호는 <strong>${ticketNumber}번</strong>입니다.`;
-      queueList.innerHTML = queue.map(item => `<li>${item}</li>`).join('');
-      waitingCount.innerText = `현재 대기 인원: ${queue.length}명`;
-    }
-  </script>
+  <p>여기서 업무 선택 및 전화번호 입력 기능이 이어집니다...</p>
 </body>
 </html>
