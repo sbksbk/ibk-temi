@@ -3,29 +3,92 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>실시간 환율</title>
+  <title>실시간 환율 정보 - 한국수출입은행</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       font-family: 'Noto Sans KR', sans-serif;
-      margin: 0;
+      background-color: #f4f6f9;
+      padding: 20px;
+      text-align: center;
     }
-    header {
+    h2 {
+      color: #003e8a;
+    }
+    table {
+      width: 95%;
+      margin: 20px auto;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+    th {
       background-color: #003e8a;
       color: white;
-      text-align: center;
-      padding: 20px;
-      font-size: 1.6em;
-    }
-    iframe {
-      width: 100%;
-      height: 90vh;
-      border: none;
     }
   </style>
 </head>
 <body>
-  <header>💱 실시간 환율 정보</header>
-  <iframe src="https://finance.naver.com/marketindex/exchangeList.naver"></iframe>
+  <h2>💱 실시간 환율 정보 (한국수출입은행 기준)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>통화명</th>
+        <th>환율 (₩)</th>
+        <th>매매 기준율</th>
+        <th>기준일</th>
+      </tr>
+    </thead>
+    <tbody id="exchangeTable">
+      <tr><td colspan="4">🔄 환율 정보를 불러오는 중...</td></tr>
+    </tbody>
+  </table>
+
+  <script>
+    function getTodayDateStr() {
+      const today = new Date();
+      const yyyy = today.getFullYear();
+      const mm = String(today.getMonth() + 1).padStart(2, '0');
+      const dd = String(today.getDate()).padStart(2, '0');
+      return yyyy + mm + dd;
+    }
+
+    function fetchRates(date) {
+      const url = `https://www.koreaexim.go.kr/site/program/financial/exchangeJSON?authkey=8hOPK7z3vq3MaVVTzfFMmjtBWbZOTrh1&searchdate=${date}&data=AP01`;
+      fetch(url)
+        .then(res => res.json())
+        .then(data => {
+          const table = document.getElementById('exchangeTable');
+          table.innerHTML = '';
+          const major = ['USD', 'EUR', 'JPY(100)', 'CNY', 'HKD', 'GBP', 'AUD', 'CAD', 'CHF'];
+          if (!data || data.length === 0) throw new Error("No data");
+
+          data.forEach(item => {
+            if (major.includes(item.cur_unit)) {
+              const row = `<tr>
+                <td>${item.cur_nm} ({item.cur_unit})</td>
+                <td>${item.deal_bas_r}</td>
+                <td>${item.ttb} / ${item.tts}</td>
+                <td>${item.kftc_deal_bas_r || 'N/A'}</td>
+              </tr>`;
+              table.innerHTML += row;
+            }
+          });
+        })
+        .catch(err => {
+          console.error("환율 API 오류 또는 비영업일:", err);
+          if (date !== "20250425") {
+            fetchRates("20250425"); // fallback to previous weekday
+          } else {
+            document.getElementById('exchangeTable').innerHTML =
+              "<tr><td colspan='4'>❌ 환율 데이터를 불러올 수 없습니다.</td></tr>";
+          }
+        });
+    }
+
+    fetchRates(getTodayDateStr());
+  </script>
 </body>
 </html>
