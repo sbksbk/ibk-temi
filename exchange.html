@@ -3,7 +3,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>실시간 환율 정보 (샘플)</title>
+  <title>환율 정보 (TOP 16국가)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
@@ -14,56 +14,97 @@
     }
     h2 {
       color: #003e8a;
+      margin-bottom: 10px;
     }
-    table {
-      width: 95%;
-      margin: 20px auto;
-      border-collapse: collapse;
+    .update {
+      font-size: 0.9em;
+      color: #666;
+      margin-bottom: 25px;
     }
-    th, td {
-      padding: 10px;
-      border: 1px solid #ccc;
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
     }
-    th {
-      background-color: #003e8a;
-      color: white;
+    .card {
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      width: 260px;
+      padding: 20px;
+      text-align: center;
+    }
+    .card img {
+      width: 40px;
+      height: 30px;
+      border: 1px solid #ddd;
+      margin-bottom: 10px;
+    }
+    .card h3 {
+      margin: 10px 0 5px;
+      font-size: 1.2em;
+      color: #003e8a;
+    }
+    .rate {
+      font-size: 1.4em;
+      margin-bottom: 10px;
+      color: #222;
+    }
+    .range {
+      font-size: 0.9em;
+      color: #666;
+    }
+    .change {
+      font-size: 0.9em;
+      margin: 5px 0;
+      color: green;
     }
   </style>
 </head>
 <body>
-  <h2>💱 실시간 환율 정보 (샘플 · 2025년 4월 25일 기준)</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>통화명</th>
-        <th>환율 (₩)</th>
-        <th>매매 기준율</th>
-        <th>기준일</th>
-      </tr>
-    </thead>
-    <tbody id="exchangeTable">
-    </tbody>
-  </table>
+  <h2>💱 주요 16개국 환율 정보</h2>
+  <div class="update">업데이트: 2025-04-25 11:00 기준</div>
+  <div class="card-container" id="cards"></div>
 
   <script>
     const sampleData = [
-      { cur_nm: "미국 달러", cur_unit: "USD", deal_bas_r: "1,410.30", ttb: "1,396.00", tts: "1,424.60", kftc_deal_bas_r: "2025-04-25" },
-      { cur_nm: "유럽연합 EUR", cur_unit: "EUR", deal_bas_r: "1,532.20", ttb: "1,510.00", tts: "1,554.40", kftc_deal_bas_r: "2025-04-25" },
-      { cur_nm: "일본 엔 (100)", cur_unit: "JPY(100)", deal_bas_r: "935.10", ttb: "916.50", tts: "953.70", kftc_deal_bas_r: "2025-04-25" },
-      { cur_nm: "중국 위안", cur_unit: "CNY", deal_bas_r: "195.30", ttb: "191.00", tts: "199.60", kftc_deal_bas_r: "2025-04-25" },
-      { cur_nm: "홍콩 달러", cur_unit: "HKD", deal_bas_r: "180.10", ttb: "177.50", tts: "182.70", kftc_deal_bas_r: "2025-04-25" },
-      { cur_nm: "영국 파운드", cur_unit: "GBP", deal_bas_r: "1,790.40", ttb: "1,758.00", tts: "1,822.80", kftc_deal_bas_r: "2025-04-25" }
+      { flag: "us", cur_nm: "미국 달러", cur_unit: "USD", deal_bas_r: 1410.3, ttb: 1396.0, tts: 1424.6, prev: 1402.1 },
+      { flag: "eu", cur_nm: "유럽연합 유로", cur_unit: "EUR", deal_bas_r: 1532.2, ttb: 1510.0, tts: 1554.4, prev: 1518.0 },
+      { flag: "jp", cur_nm: "일본 엔 (100)", cur_unit: "JPY(100)", deal_bas_r: 935.1, ttb: 916.5, tts: 953.7, prev: 930.0 },
+      { flag: "cn", cur_nm: "중국 위안", cur_unit: "CNY", deal_bas_r: 195.3, ttb: 191.0, tts: 199.6, prev: 196.0 },
+      { flag: "hk", cur_nm: "홍콩 달러", cur_unit: "HKD", deal_bas_r: 180.1, ttb: 177.5, tts: 182.7, prev: 179.0 },
+      { flag: "gb", cur_nm: "영국 파운드", cur_unit: "GBP", deal_bas_r: 1790.4, ttb: 1758.0, tts: 1822.8, prev: 1784.2 },
+      { flag: "ca", cur_nm: "캐나다 달러", cur_unit: "CAD", deal_bas_r: 1020.5, ttb: 1005.0, tts: 1036.0, prev: 1012.3 },
+      { flag: "au", cur_nm: "호주 달러", cur_unit: "AUD", deal_bas_r: 945.6, ttb: 928.0, tts: 963.2, prev: 940.0 },
+      { flag: "ch", cur_nm: "스위스 프랑", cur_unit: "CHF", deal_bas_r: 1572.8, ttb: 1546.0, tts: 1599.6, prev: 1581.2 },
+      { flag: "sg", cur_nm: "싱가포르 달러", cur_unit: "SGD", deal_bas_r: 1048.9, ttb: 1031.0, tts: 1066.8, prev: 1052.7 },
+      { flag: "nz", cur_nm: "뉴질랜드 달러", cur_unit: "NZD", deal_bas_r: 880.2, ttb: 864.0, tts: 896.4, prev: 875.1 },
+      { flag: "se", cur_nm: "스웨덴 크로나", cur_unit: "SEK", deal_bas_r: 128.6, ttb: 125.0, tts: 132.2, prev: 127.8 },
+      { flag: "dk", cur_nm: "덴마크 크로네", cur_unit: "DKK", deal_bas_r: 205.5, ttb: 200.0, tts: 211.0, prev: 204.0 },
+      { flag: "no", cur_nm: "노르웨이 크로네", cur_unit: "NOK", deal_bas_r: 190.3, ttb: 185.0, tts: 195.6, prev: 191.5 },
+      { flag: "th", cur_nm: "태국 바트", cur_unit: "THB", deal_bas_r: 38.2, ttb: 37.0, tts: 39.4, prev: 38.6 },
+      { flag: "my", cur_nm: "말레이시아 링깃", cur_unit: "MYR", deal_bas_r: 298.9, ttb: 292.0, tts: 305.8, prev: 300.2 }
     ];
 
-    const table = document.getElementById('exchangeTable');
+    const container = document.getElementById("cards");
+
     sampleData.forEach(item => {
-      const row = `<tr>
-        <td>${item.cur_nm} (${item.cur_unit})</td>
-        <td>${item.deal_bas_r}</td>
-        <td>${item.ttb} / ${item.tts}</td>
-        <td>${item.kftc_deal_bas_r}</td>
-      </tr>`;
-      table.innerHTML += row;
+      const change = (item.deal_bas_r - item.prev).toFixed(2);
+      const changeRate = ((item.deal_bas_r - item.prev) / item.prev * 100).toFixed(2);
+      const changeColor = change > 0 ? 'red' : (change < 0 ? 'blue' : '#555');
+      const changeText = change > 0 ? `▲ +${change} (+${changeRate}%)` : (change < 0 ? `▼ ${change} (${changeRate}%)` : '변동 없음');
+
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <img src="https://flagcdn.com/48x36/${item.flag}.png" alt="${item.cur_unit}">
+        <h3>${item.cur_nm} (${item.cur_unit})</h3>
+        <div class="rate">${item.deal_bas_r.toFixed(2)} ₩</div>
+        <div class="change" style="color:${changeColor}">${changeText}</div>
+        <div class="range">매입: ${item.ttb} / 매도: ${item.tts}</div>
+      `;
+      container.appendChild(card);
     });
   </script>
 </body>
