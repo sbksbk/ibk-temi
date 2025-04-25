@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -28,6 +29,20 @@
       flex-direction: column;
       align-items: center;
       padding: 40px;
+    }
+    .header-buttons {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .header-buttons button {
+      background-color: #003e8a;
+      color: white;
+      font-size: 1em;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
     }
     .container {
       background-color: white;
@@ -77,13 +92,13 @@
       border-radius: 8px;
       border: 1px solid #ccc;
     }
-    button {
+    button.submit {
       background-color: #003e8a;
       color: white;
       border: none;
       cursor: pointer;
     }
-    button:hover {
+    button.submit:hover {
       background-color: #002766;
     }
     .ticket {
@@ -117,7 +132,13 @@
   </style>
 </head>
 <body>
-  <h2>📱 대기번호 발급</h2>
+  <h2>📱 IBK 대기번호 발급 시스템</h2>
+
+  <div class="header-buttons">
+    <button onclick="location.href='temi-exchange-view.html'">💱 실시간 환율 보기</button>
+    <button onclick="alert('📰 뉴스 보기 기능은 곧 추가됩니다!')">📰 뉴스 보기</button>
+  </div>
+
   <div class="container">
     <div class="left-panel">
       <div class="service-buttons">
@@ -131,7 +152,7 @@
       <label for="phone">전화번호</label>
       <input type="tel" id="phone" placeholder="010-1234-5678">
       <input type="hidden" id="service">
-      <button onclick="issueTicket()">대기번호 받기</button>
+      <button class="submit" onclick="issueTicket()">대기번호 받기</button>
       <div class="ticket" id="ticketDisplay"></div>
       <div class="list">
         <h3>🧾 대기자 리스트</h3>
@@ -140,6 +161,7 @@
       </div>
     </div>
   </div>
+
   <script>
     let ticketNumber = 100;
     const queue = [];
