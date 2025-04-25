@@ -1,0 +1,162 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>IBK 대기번호 발급</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f4f6f9;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px;
+    }
+    h2 {
+      text-align: center;
+      color: #003e8a;
+    }
+    .container {
+      background-color: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+      max-width: 1200px;
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      gap: 40px;
+    }
+    .left-panel, .right-panel {
+      flex: 1;
+    }
+    .service-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .service-button {
+      padding: 30px;
+      font-size: 1.5em;
+      text-align: center;
+      border-radius: 12px;
+      background-color: #e0ecff;
+      color: #003e8a;
+      cursor: pointer;
+      border: 2px solid #003e8a;
+    }
+    .service-button.selected {
+      background-color: #003e8a;
+      color: white;
+    }
+    label, input, button {
+      width: 100%;
+      font-size: 1.2em;
+      margin-top: 20px;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button.submit {
+      background-color: #003e8a;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .ticket {
+      margin-top: 20px;
+      font-size: 1.2em;
+      color: green;
+    }
+    .list {
+      margin-top: 40px;
+    }
+    .list h3 {
+      color: #333;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 8px;
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    li {
+      padding: 6px 0;
+      border-bottom: 1px solid #eee;
+      font-size: 1em;
+    }
+    .count {
+      font-size: 1em;
+      color: #555;
+      margin-bottom: 10px;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <h2>📋 IBK 대기번호 발급</h2>
+
+  <div class="container">
+    <div class="left-panel">
+      <div class="service-buttons">
+        <div class="service-button" onclick="selectService('예금')">예금</div>
+        <div class="service-button" onclick="selectService('적금')">적금</div>
+        <div class="service-button" onclick="selectService('대출')">대출</div>
+        <div class="service-button" onclick="selectService('카드')">카드</div>
+      </div>
+    </div>
+    <div class="right-panel">
+      <label for="phone">전화번호</label>
+      <input type="tel" id="phone" placeholder="010-1234-5678">
+      <input type="hidden" id="service">
+      <button class="submit" onclick="issueTicket()">대기번호 받기</button>
+      <div class="ticket" id="ticketDisplay"></div>
+      <div class="list">
+        <h3>🧾 대기자 리스트</h3>
+        <div class="count" id="waitingCount">현재 대기 인원: 0명</div>
+        <ul id="queueList"></ul>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let ticketNumber = 100;
+    const queue = [];
+
+    function selectService(service) {
+      document.getElementById('service').value = service;
+      document.querySelectorAll('.service-button').forEach(btn => btn.classList.remove('selected'));
+      const buttons = document.querySelectorAll('.service-button');
+      buttons.forEach(btn => {
+        if (btn.textContent === service) {
+          btn.classList.add('selected');
+        }
+      });
+    }
+
+    function issueTicket() {
+      const phone = document.getElementById('phone').value;
+      const service = document.getElementById('service').value;
+      const display = document.getElementById('ticketDisplay');
+      const queueList = document.getElementById('queueList');
+      const waitingCount = document.getElementById('waitingCount');
+
+      if (!phone || !service) {
+        alert("전화번호와 업무를 모두 입력해주세요.");
+        return;
+      }
+
+      ticketNumber++;
+      const maskedPhone = phone.slice(0, 3) + '-****-' + phone.slice(-4);
+      const ticket = `${ticketNumber}번 | ${maskedPhone} | ${service}`;
+      queue.push(ticket);
+
+      display.innerHTML = `✅ ${maskedPhone} 고객님<br>🧾 ${service} 대기번호는 <strong>${ticketNumber}번</strong>입니다.`;
+      queueList.innerHTML = queue.map(item => `<li>${item}</li>`).join('');
+      waitingCount.innerText = `현재 대기 인원: ${queue.length}명`;
+    }
+  </script>
+</body>
+</html>
