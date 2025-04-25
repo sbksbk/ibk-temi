@@ -3,33 +3,38 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>환율 카드 + 고정된 X버튼 차트</title>
+  <title>IBK 환율 카드 - 4x4 고정형</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       font-family: 'Noto Sans KR', sans-serif;
       background: #f4f6f9;
-      padding: 20px;
+      margin: 0;
+      padding: 30px;
     }
     h2 {
       text-align: center;
       color: #003e8a;
+      margin-bottom: 30px;
     }
     .grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 20px;
-      max-width: 1200px;
-      margin: 30px auto;
+      width: 100%;
+      max-width: 1920px;
+      margin: 0 auto;
     }
     .card {
       background: white;
       border-radius: 12px;
       box-shadow: 0 4px 10px rgba(0,0,0,0.08);
       text-align: center;
-      padding: 16px;
-      cursor: pointer;
+      padding: 20px;
+      height: 160px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
     }
     .card img {
       width: 36px;
@@ -37,7 +42,7 @@
     }
     .currency {
       font-weight: bold;
-      margin: 10px 0 4px;
+      margin: 6px 0 4px;
       font-size: 1.1em;
     }
     .rate {
@@ -52,44 +57,11 @@
       color: #777;
       font-size: 0.9em;
     }
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.5);
-      justify-content: center;
-      align-items: center;
-      z-index: 999;
-    }
-    .modal-content {
-      background: white;
-      padding: 30px;
-      border-radius: 10px;
-      max-width: 860px;
-      width: 90%;
-      position: relative;
-    }
-    .modal-close {
-      position: absolute;
-      top: 15px;
-      right: 20px;
-      font-size: 1.5em;
-      cursor: pointer;
-      color: #333;
-    }
   </style>
 </head>
 <body>
   <h2>🌐 주요 16개국 환율 정보</h2>
   <div class="grid" id="grid"></div>
-
-  <div class="modal" id="modal">
-    <div class="modal-content">
-      <div class="modal-close" onclick="closeModal()">❌</div>
-      <h3 id="chartTitle"></h3>
-      <canvas id="modalChart" height="300"></canvas>
-    </div>
-  </div>
 
   <script>
     const currencies = [
@@ -111,24 +83,7 @@
       { code: "MYR", name: "말레이시아 링깃", flag: "my", rate: 298.9, prev: 300.2, ttb: 292.0, tts: 305.8 }
     ];
 
-    const labels = Array.from({ length: 25 }, (_, i) => `04/${i+1}`);
     const grid = document.getElementById("grid");
-    const modal = document.getElementById("modal");
-    const chartTitle = document.getElementById("chartTitle");
-    const ctx = document.getElementById("modalChart").getContext("2d");
-
-    const modalChart = new Chart(ctx, {
-      type: 'line',
-      data: { labels: labels, datasets: [] },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false }},
-        scales: {
-          y: { beginAtZero: false, title: { display: true, text: "₩ (원)" }},
-          x: { title: { display: true, text: "날짜" }}
-        }
-      }
-    });
 
     currencies.forEach(cur => {
       const diff = (cur.rate - cur.prev).toFixed(2);
@@ -145,25 +100,8 @@
         <div class="change" style="color:${color}">${updown} ${Math.abs(diff)} (${Math.abs(percent)}%)</div>
         <div class="range">매입: ${cur.ttb} / 매도: ${cur.tts}</div>
       `;
-      div.onclick = () => {
-        chartTitle.textContent = `${cur.name} (${cur.code}) 환율 변화`;
-        modalChart.data.datasets = [{
-          label: cur.code,
-          data: labels.map((_, i) => cur.rate + Math.sin(i / 2) * 10 + (Math.random() * 5 - 2.5)),
-          borderColor: "#007bff",
-          backgroundColor: "#007bff22",
-          tension: 0.3,
-          fill: true
-        }];
-        modalChart.update();
-        modal.style.display = "flex";
-      };
       grid.appendChild(div);
     });
-
-    function closeModal() {
-      modal.style.display = "none";
-    }
   </script>
 </body>
 </html>
