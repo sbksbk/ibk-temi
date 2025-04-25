@@ -1,0 +1,61 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>IBK 기능 페이지</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      padding: 20px;
+    }
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .tabs button {
+      padding: 10px 20px;
+      font-size: 1em;
+      background-color: #e0ecff;
+      border: 1px solid #003e8a;
+      color: #003e8a;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    iframe {
+      width: 100%;
+      height: 80vh;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+  </style>
+  <script>
+    function navigateTo(section) {
+      const iframe = document.getElementById('view');
+      if (section === '대기') {
+        iframe.src = 'waiting-system.html';
+      } else if (section === '환율') {
+        iframe.src = 'temi-exchange-view.html';
+      } else if (section === '뉴스') {
+        iframe.src = 'https://news.naver.com/';
+      }
+    }
+
+    window.onload = function () {
+      const hash = location.hash.replace('#', '');
+      navigateTo(hash || '대기');
+    };
+  </script>
+</head>
+<body>
+  <h2>📱 IBK 기능 선택</h2>
+  <div class="tabs">
+    <button onclick="navigateTo('대기')">📋 대기번호</button>
+    <button onclick="navigateTo('환율')">💱 환율</button>
+    <button onclick="navigateTo('뉴스')">📰 뉴스</button>
+  </div>
+  <iframe id="view" src=""></iframe>
+</body>
+</html>
