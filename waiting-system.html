@@ -1,0 +1,67 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>대기번호 발급</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f4f6f9;
+      padding: 30px;
+      text-align: center;
+    }
+    h2 {
+      color: #003e8a;
+    }
+    input, button {
+      margin: 10px;
+      padding: 12px;
+      font-size: 1.1em;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #003e8a;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .list {
+      margin-top: 30px;
+      text-align: left;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
+</head>
+<body>
+  <h2>📋 대기번호 발급</h2>
+  <input type="text" id="phone" placeholder="전화번호 입력"><br>
+  <button onclick="issue()">대기번호 받기</button>
+  <div id="result"></div>
+  <div class="list">
+    <h3>🧾 대기자 리스트</h3>
+    <ul id="queue"></ul>
+  </div>
+  <script>
+    let queue = [];
+    let ticket = 100;
+
+    function issue() {
+      const phone = document.getElementById("phone").value;
+      if (!phone) {
+        alert("전화번호를 입력하세요");
+        return;
+      }
+      ticket++;
+      const masked = phone.slice(0, 3) + "-****-" + phone.slice(-4);
+      queue.push(`${ticket}번 | ${masked}`);
+      document.getElementById("result").innerHTML = `<p>✅ ${masked} 고객님<br><strong>${ticket}번</strong> 대기번호가 발급되었습니다.</p>`;
+      document.getElementById("queue").innerHTML = queue.map(q => `<li>${q}</li>`).join('');
+    }
+  </script>
+</body>
+</html>
