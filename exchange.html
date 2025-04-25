@@ -3,109 +3,177 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <title>환율 정보 (TOP 16국가)</title>
+  <title>IBK 환율 카드 + 팝업 차트</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     body {
       font-family: 'Noto Sans KR', sans-serif;
-      background-color: #f4f6f9;
-      padding: 20px;
-      text-align: center;
+      background: #f4f6f9;
+      margin: 0;
+      padding: 30px;
     }
     h2 {
+  font-size: 32px;
+      text-align: center;
       color: #003e8a;
-      margin-bottom: 10px;
+      margin-bottom: 30px;
     }
-    .update {
-      font-size: 0.9em;
-      color: #666;
-      margin-bottom: 25px;
-    }
-    .card-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
       gap: 20px;
+      width: 100%;
+      max-width: 1920px;
+      margin: 0 auto;
     }
     .card {
-      background-color: white;
+      background: white;
       border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      width: 260px;
-      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
       text-align: center;
+      padding: 20px;
+      height: 160px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      cursor: pointer;
     }
     .card img {
-      width: 40px;
-      height: 30px;
-      border: 1px solid #ddd;
-      margin-bottom: 10px;
+      width: 36px;
+      height: 26px;
     }
-    .card h3 {
-      margin: 10px 0 5px;
-      font-size: 1.2em;
-      color: #003e8a;
+    .currency {
+      font-weight: bold;
+      margin: 6px 0 4px;
+      font-size: 1.1em;
     }
     .rate {
-      font-size: 1.4em;
-      margin-bottom: 10px;
+      font-size: 1.3em;
       color: #222;
     }
-    .range {
-      font-size: 0.9em;
-      color: #666;
-    }
     .change {
+      margin-top: 6px;
+      font-size: 0.95em;
+    }
+    .range {
+      color: #777;
       font-size: 0.9em;
-      margin: 5px 0;
-      color: green;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .modal-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 640px;
+      max-height: 80%;
+      overflow-y: auto;
+    }
+    .modal-close {
+      text-align: center;
+      font-size: 1.5em;
+      color: #333;
+      cursor: pointer;
+    }
+    #modalChart {
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <h2>💱 주요 16개국 환율 정보</h2>
-  <div class="update">업데이트: 2025-04-25 11:00 기준</div>
-  <div class="card-container" id="cards"></div>
+  <h2>🌐 주요 16개국 환율 정보</h2>
+  <div class="grid" id="grid"></div>
+
+  <div class="modal" id="modal">
+    <div class="modal-content" style="position:relative;">
+      <div class="modal-close" onclick="closeModal()" style="position:absolute; top:10px; right:20px;">❌</div>
+      <h3 id="chartTitle" style="text-align:center; margin: 10px 0;"></h3>
+      <canvas id="modalChart" height="250"></canvas>
+    </div>
+  </div>
 
   <script>
-    const sampleData = [
-      { flag: "us", cur_nm: "미국 달러", cur_unit: "USD", deal_bas_r: 1410.3, ttb: 1396.0, tts: 1424.6, prev: 1402.1 },
-      { flag: "eu", cur_nm: "유럽연합 유로", cur_unit: "EUR", deal_bas_r: 1532.2, ttb: 1510.0, tts: 1554.4, prev: 1518.0 },
-      { flag: "jp", cur_nm: "일본 엔 (100)", cur_unit: "JPY(100)", deal_bas_r: 935.1, ttb: 916.5, tts: 953.7, prev: 930.0 },
-      { flag: "cn", cur_nm: "중국 위안", cur_unit: "CNY", deal_bas_r: 195.3, ttb: 191.0, tts: 199.6, prev: 196.0 },
-      { flag: "hk", cur_nm: "홍콩 달러", cur_unit: "HKD", deal_bas_r: 180.1, ttb: 177.5, tts: 182.7, prev: 179.0 },
-      { flag: "gb", cur_nm: "영국 파운드", cur_unit: "GBP", deal_bas_r: 1790.4, ttb: 1758.0, tts: 1822.8, prev: 1784.2 },
-      { flag: "ca", cur_nm: "캐나다 달러", cur_unit: "CAD", deal_bas_r: 1020.5, ttb: 1005.0, tts: 1036.0, prev: 1012.3 },
-      { flag: "au", cur_nm: "호주 달러", cur_unit: "AUD", deal_bas_r: 945.6, ttb: 928.0, tts: 963.2, prev: 940.0 },
-      { flag: "ch", cur_nm: "스위스 프랑", cur_unit: "CHF", deal_bas_r: 1572.8, ttb: 1546.0, tts: 1599.6, prev: 1581.2 },
-      { flag: "sg", cur_nm: "싱가포르 달러", cur_unit: "SGD", deal_bas_r: 1048.9, ttb: 1031.0, tts: 1066.8, prev: 1052.7 },
-      { flag: "nz", cur_nm: "뉴질랜드 달러", cur_unit: "NZD", deal_bas_r: 880.2, ttb: 864.0, tts: 896.4, prev: 875.1 },
-      { flag: "se", cur_nm: "스웨덴 크로나", cur_unit: "SEK", deal_bas_r: 128.6, ttb: 125.0, tts: 132.2, prev: 127.8 },
-      { flag: "dk", cur_nm: "덴마크 크로네", cur_unit: "DKK", deal_bas_r: 205.5, ttb: 200.0, tts: 211.0, prev: 204.0 },
-      { flag: "no", cur_nm: "노르웨이 크로네", cur_unit: "NOK", deal_bas_r: 190.3, ttb: 185.0, tts: 195.6, prev: 191.5 },
-      { flag: "th", cur_nm: "태국 바트", cur_unit: "THB", deal_bas_r: 38.2, ttb: 37.0, tts: 39.4, prev: 38.6 },
-      { flag: "my", cur_nm: "말레이시아 링깃", cur_unit: "MYR", deal_bas_r: 298.9, ttb: 292.0, tts: 305.8, prev: 300.2 }
+    const currencies = [
+      { code: "USD", name: "미국 달러", flag: "us", rate: 1410.3, prev: 1402.1, ttb: 1396, tts: 1424.6 },
+      { code: "EUR", name: "유럽 유로", flag: "eu", rate: 1532.2, prev: 1518.0, ttb: 1510, tts: 1554.4 },
+      { code: "JPY", name: "일본 엔", flag: "jp", rate: 935.1, prev: 930.0, ttb: 916.5, tts: 953.7 },
+      { code: "CNY", name: "중국 위안", flag: "cn", rate: 195.3, prev: 196.0, ttb: 191.0, tts: 199.6 },
+      { code: "HKD", name: "홍콩 달러", flag: "hk", rate: 180.1, prev: 179.0, ttb: 177.5, tts: 182.7 },
+      { code: "GBP", name: "영국 파운드", flag: "gb", rate: 1790.4, prev: 1784.2, ttb: 1758, tts: 1822.8 },
+      { code: "CAD", name: "캐나다 달러", flag: "ca", rate: 1020.5, prev: 1012.3, ttb: 1005, tts: 1036 },
+      { code: "AUD", name: "호주 달러", flag: "au", rate: 945.6, prev: 940.0, ttb: 928, tts: 963.2 },
+      { code: "CHF", name: "스위스 프랑", flag: "ch", rate: 1572.8, prev: 1581.2, ttb: 1546, tts: 1599.6 },
+      { code: "SGD", name: "싱가포르 달러", flag: "sg", rate: 1048.9, prev: 1052.7, ttb: 1031, tts: 1066.8 },
+      { code: "NZD", name: "뉴질랜드 달러", flag: "nz", rate: 880.2, prev: 875.1, ttb: 864, tts: 896.4 },
+      { code: "SEK", name: "스웨덴 크로나", flag: "se", rate: 128.6, prev: 127.8, ttb: 125, tts: 132.2 },
+      { code: "DKK", name: "덴마크 크로네", flag: "dk", rate: 205.5, prev: 204.0, ttb: 200, tts: 211.0 },
+      { code: "NOK", name: "노르웨이 크로네", flag: "no", rate: 190.3, prev: 191.5, ttb: 185, tts: 195.6 },
+      { code: "THB", name: "태국 바트", flag: "th", rate: 38.2, prev: 38.6, ttb: 37.0, tts: 39.4 },
+      { code: "MYR", name: "말레이시아 링깃", flag: "my", rate: 298.9, prev: 300.2, ttb: 292.0, tts: 305.8 }
     ];
 
-    const container = document.getElementById("cards");
+    const grid = document.getElementById("grid");
+    const modal = document.getElementById("modal");
+    const chartTitle = document.getElementById("chartTitle");
+    const ctx = document.getElementById("modalChart").getContext("2d");
 
-    sampleData.forEach(item => {
-      const change = (item.deal_bas_r - item.prev).toFixed(2);
-      const changeRate = ((item.deal_bas_r - item.prev) / item.prev * 100).toFixed(2);
-      const changeColor = change > 0 ? 'red' : (change < 0 ? 'blue' : '#555');
-      const changeText = change > 0 ? `▲ +${change} (+${changeRate}%)` : (change < 0 ? `▼ ${change} (${changeRate}%)` : '변동 없음');
-
-      const card = document.createElement("div");
-      card.className = "card";
-      card.innerHTML = `
-        <img src="https://flagcdn.com/48x36/${item.flag}.png" alt="${item.cur_unit}">
-        <h3>${item.cur_nm} (${item.cur_unit})</h3>
-        <div class="rate">${item.deal_bas_r.toFixed(2)} ₩</div>
-        <div class="change" style="color:${changeColor}">${changeText}</div>
-        <div class="range">매입: ${item.ttb} / 매도: ${item.tts}</div>
-      `;
-      container.appendChild(card);
+    const modalChart = new Chart(ctx, {
+      type: 'line',
+      data: { labels: [], datasets: [] },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false }},
+        scales: {
+          y: { beginAtZero: false },
+          x: { title: { display: true, text: "일자" }}
+        }
+      }
     });
+
+    currencies.forEach(cur => {
+      const diff = (cur.rate - cur.prev).toFixed(2);
+      const percent = ((cur.rate - cur.prev) / cur.prev * 100).toFixed(2);
+      const updown = diff > 0 ? "▲" : "▼";
+      const color = diff > 0 ? "red" : "blue";
+
+      const div = document.createElement("div");
+      div.className = "card";
+      div.innerHTML = `
+        <img src="https://flagcdn.com/48x36/${cur.flag}.png">
+        <div class="currency">${cur.name} (${cur.code})</div>
+        <div class="rate">${cur.rate.toFixed(2)} ₩</div>
+        <div class="change" style="color:${color}">${updown} ${Math.abs(diff)} (${Math.abs(percent)}%)</div>
+        <div class="range">매입: ${cur.ttb} / 매도: ${cur.tts}</div>
+      `;
+      div.onclick = () => {
+        chartTitle.textContent = `${cur.name} (${cur.code}) 최근 환율 변화`;
+        modalChart.data.labels = Array.from({length: 14}, (_, i) => `04/${i+1}`);
+        modalChart.data.datasets = [{
+          label: cur.code,
+          data: Array.from({length: 14}, (_, i) => cur.rate + Math.sin(i / 2) * 10 + (Math.random() * 5 - 2.5)),
+          borderColor: "#007bff",
+          backgroundColor: "#007bff22",
+          fill: true,
+          tension: 0.3
+        }];
+        modalChart.update();
+        modal.style.display = "flex";
+      };
+      grid.appendChild(div);
+    });
+
+    function closeModal() {
+      modal.style.display = "none";
+    }
   </script>
 </body>
 </html>
