@@ -14,10 +14,10 @@
       padding: 30px;
     }
     h2 {
-  font-size: 32px;
       text-align: center;
       color: #003e8a;
       margin-bottom: 30px;
+      font-size: 32px;
     }
     .grid {
       display: grid;
@@ -74,18 +74,21 @@
       padding: 20px;
       border-radius: 12px;
       width: 90%;
-      max-width: 640px;
+      max-width: 600px;
       max-height: 80%;
       overflow-y: auto;
+      position: relative;
     }
     .modal-close {
-      text-align: center;
+      position: absolute;
+      top: 10px;
+      right: 20px;
       font-size: 1.5em;
       color: #333;
       cursor: pointer;
     }
     #modalChart {
-      margin-top: 10px;
+      margin-top: 30px;
     }
   </style>
 </head>
@@ -94,8 +97,8 @@
   <div class="grid" id="grid"></div>
 
   <div class="modal" id="modal">
-    <div class="modal-content" style="position:relative;">
-      <div class="modal-close" onclick="closeModal()" style="position:absolute; top:10px; right:20px;">❌</div>
+    <div class="modal-content">
+      <div class="modal-close" onclick="closeModal()">❌</div>
       <h3 id="chartTitle" style="text-align:center; margin: 10px 0;"></h3>
       <canvas id="modalChart" height="250"></canvas>
     </div>
