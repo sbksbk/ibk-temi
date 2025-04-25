@@ -1,0 +1,70 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>샘플 환율 정보</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f4f6f9;
+      padding: 20px;
+      text-align: center;
+    }
+    h2 {
+      color: #003e8a;
+    }
+    table {
+      width: 95%;
+      margin: 20px auto;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+    th {
+      background-color: #003e8a;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h2>💱 샘플 환율 정보 (정적 데이터)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>통화명</th>
+        <th>환율 (₩)</th>
+        <th>매매 기준율</th>
+        <th>기준일</th>
+      </tr>
+    </thead>
+    <tbody id="exchangeTable"></tbody>
+  </table>
+
+  <script>
+    const sampleData = [
+      {{ cur_nm: "미국 달러", cur_unit: "USD", deal_bas_r: "1,410.30", ttb: "1,396.00", tts: "1,424.60", kftc_deal_bas_r: "2025-04-25" }},
+      {{ cur_nm: "유럽연합 EUR", cur_unit: "EUR", deal_bas_r: "1,532.20", ttb: "1,510.00", tts: "1,554.40", kftc_deal_bas_r: "2025-04-25" }},
+      {{ cur_nm: "일본 엔 (100)", cur_unit: "JPY(100)", deal_bas_r: "935.10", ttb: "916.50", tts: "953.70", kftc_deal_bas_r: "2025-04-25" }},
+      {{ cur_nm: "중국 위안", cur_unit: "CNY", deal_bas_r: "195.30", ttb: "191.00", tts: "199.60", kftc_deal_bas_r: "2025-04-25" }},
+      {{ cur_nm: "홍콩 달러", cur_unit: "HKD", deal_bas_r: "180.10", ttb: "177.50", tts: "182.70", kftc_deal_bas_r: "2025-04-25" }},
+      {{ cur_nm: "영국 파운드", cur_unit: "GBP", deal_bas_r: "1,790.40", ttb: "1,758.00", tts: "1,822.80", kftc_deal_bas_r: "2025-04-25" }}
+    ];
+
+    const table = document.getElementById('exchangeTable');
+    table.innerHTML = '';
+    sampleData.forEach(item => {
+      const row = `<tr>
+        <td>${item.cur_nm} (${item.cur_unit})</td>
+        <td>${item.deal_bas_r}</td>
+        <td>${item.ttb} / ${item.tts}</td>
+        <td>${item.kftc_deal_bas_r}</td>
+      </tr>`;
+      table.innerHTML += row;
+    });
+  </script>
+</body>
+</html>
