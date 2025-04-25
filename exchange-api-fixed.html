@@ -1,0 +1,64 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>실시간 환율 정보</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f4f6f9;
+      padding: 20px;
+      text-align: center;
+    }
+    h2 {
+      color: #003e8a;
+    }
+    table {
+      width: 90%;
+      margin: 20px auto;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ccc;
+    }
+    th {
+      background-color: #003e8a;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <h2>💱 실시간 환율 정보 (기준: KRW)</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>통화</th>
+        <th>환율</th>
+      </tr>
+    </thead>
+    <tbody id="exchangeTable"></tbody>
+  </table>
+
+  <script>
+    fetch('https://open.er-api.com/v6/latest/KRW')
+      .then(response => response.json())
+      .then(data => {
+        const rates = data.rates;
+        const table = document.getElementById('exchangeTable');
+        const major = ['USD', 'EUR', 'JPY', 'CNY', 'HKD', 'GBP', 'AUD', 'CAD', 'CHF'];
+        major.forEach(code => {
+          const rate = rates[code];
+          const row = `<tr><td>${code}</td><td>${rate.toFixed(2)}</td></tr>`;
+          table.innerHTML += row;
+        });
+      })
+      .catch(err => {
+        document.getElementById('exchangeTable').innerHTML = "<tr><td colspan='2'>환율 데이터를 불러올 수 없습니다.</td></tr>";
+        console.error("환율 API 오류:", err);
+      });
+  </script>
+</body>
+</html>
