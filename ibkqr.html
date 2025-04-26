@@ -3,53 +3,67 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>IBK 기업은행 앱 설치 (고정형)</title>
+    <title>IBK 기업은행 앱 설치 (팝업형 X버튼 제거)</title>
     <style>
         body {
             margin: 0;
             padding: 0;
-            background-color: #ffffff;
-            font-family: 'Segoe UI', sans-serif;
+            background-color: rgba(0, 0, 0, 0.5);
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            justify-content: flex-start;
-            min-height: 100vh;
-            overflow-x: hidden;
+            height: 100vh;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
         }
-        .card {
-            padding: 30px 20px;
-            max-width: 1000px;
-            width: 100%;
-            box-sizing: border-box;
+        .popup-card {
+            background: white;
+            border-radius: 24px;
+            padding: 30px 40px;
+            max-width: 800px;
+            width: 90%;
             text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            position: relative;
+            transform: scale(0.7);
+            opacity: 0;
+            animation: popupIn 0.4s ease-out forwards;
         }
-        .title {
+        @keyframes popupIn {
+            0% {
+                transform: scale(0.7);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .popup-title {
             font-size: 36px;
             font-weight: bold;
             color: #003366;
-            margin-top: 40px;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
         }
         .qr-section {
             display: flex;
             justify-content: center;
             align-items: center;
             flex-wrap: wrap;
-            gap: 80px;
-            margin-bottom: 40px;
+            gap: 60px;
+            margin-bottom: 20px;
         }
         .qr-block {
             text-align: center;
         }
         .qr-block img {
-            width: 300px;
-            height: 300px;
+            width: 280px;
+            height: 280px;
             border: 2px solid #ccc;
             border-radius: 16px;
         }
         .button {
-            margin-top: 16px;
+            margin-top: 12px;
             background-color: #0072ce;
             color: white;
             border: none;
@@ -62,13 +76,13 @@
         .small-text {
             font-size: 16px;
             color: #666666;
-            margin-top: 20px;
+            margin-top: 30px;
         }
     </style>
 </head>
 <body>
-    <div class="card">
-        <div class="title">IBK 기업은행 앱 설치하기</div>
+    <div class="popup-card">
+        <div class="popup-title">IBK 기업은행 앱 설치하기</div>
         <div class="qr-section">
             <div class="qr-block">
                 <img src="qr_android.jpg" alt="Google Play QR">
