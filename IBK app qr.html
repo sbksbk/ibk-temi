@@ -1,0 +1,81 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>IBK 기업은행 앱 설치</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #ffffff;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .card {
+            border: none;
+            border-radius: 16px;
+            padding: 20px;
+            width: 100%;
+            max-width: 900px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .title {
+            font-size: 36px;
+            font-weight: bold;
+            color: #003366;
+            margin-bottom: 40px;
+        }
+        .qr-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 100px;
+        }
+        .qr-block {
+            text-align: center;
+        }
+        .qr-block img {
+            width: 338px;
+            height: 338px;
+            border: 2px solid #ccc;
+            border-radius: 16px;
+        }
+        .button {
+            margin-top: 16px;
+            background-color: #0072ce;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 14px 28px;
+            font-size: 18px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .small-text {
+            font-size: 16px;
+            color: #666666;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="title">IBK 기업은행 앱 설치하기</div>
+        <div class="qr-section">
+            <div class="qr-block">
+                <img src="qr_android.jpg" alt="Google Play QR">
+                <div><a class="button" href="https://play.google.com/store/apps/details?id=com.ibk.android.ionebank" target="_blank">Google Play</a></div>
+            </div>
+            <div class="qr-block">
+                <img src="qr_ios.jpg" alt="App Store QR">
+                <div><a class="button" href="https://apps.apple.com/kr/app/i-one-bank-%EA%B0%9C%EC%9D%B8%EA%B3%A0%EA%B0%9D%EC%9A%A9/id1460543865" target="_blank">App Store</a></div>
+            </div>
+        </div>
+        <div class="small-text">QR코드를 스캔하여 앱을 설치하세요</div>
+    </div>
+</body>
+</html>
