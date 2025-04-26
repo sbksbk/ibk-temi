@@ -1,0 +1,99 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>IBK 기업은행 앱 설치 (팝업형 X버튼 제거)</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+        }
+        .popup-card {
+            background: white;
+            border-radius: 24px;
+            padding: 30px 40px;
+            max-width: 800px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            position: relative;
+            transform: scale(0.7);
+            opacity: 0;
+            animation: popupIn 0.4s ease-out forwards;
+        }
+        @keyframes popupIn {
+            0% {
+                transform: scale(0.7);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .popup-title {
+            font-size: 36px;
+            font-weight: bold;
+            color: #003366;
+            margin-bottom: 30px;
+        }
+        .qr-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 60px;
+            margin-bottom: 20px;
+        }
+        .qr-block {
+            text-align: center;
+        }
+        .qr-block img {
+            width: 280px;
+            height: 280px;
+            border: 2px solid #ccc;
+            border-radius: 16px;
+        }
+        .button {
+            margin-top: 12px;
+            background-color: #0072ce;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 14px 28px;
+            font-size: 18px;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .small-text {
+            font-size: 16px;
+            color: #666666;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="popup-card">
+        <div class="popup-title">IBK 기업은행 앱 설치하기</div>
+        <div class="qr-section">
+            <div class="qr-block">
+                <img src="qr_android.jpg" alt="Google Play QR">
+                <div><a class="button" href="https://play.google.com/store/apps/details?id=com.ibk.android.ionebank" target="_blank">Google Play</a></div>
+            </div>
+            <div class="qr-block">
+                <img src="qr_ios.jpg" alt="App Store QR">
+                <div><a class="button" href="https://apps.apple.com/kr/app/i-one-bank-%EA%B0%9C%EC%9D%B8%EA%B3%A0%EA%B0%9D%EC%9A%A9/id1460543865" target="_blank">App Store</a></div>
+            </div>
+        </div>
+        <div class="small-text">QR코드를 스캔한 후, 화면 하단의 홈 버튼(●)을 눌러주세요</div>
+    </div>
+</body>
+</html>
