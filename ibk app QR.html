@@ -1,0 +1,122 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>IBK 기업은행 환율 정보</title>
+  <meta http-equiv="refresh" content="300">
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background-color: #f5f7fa;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 800px;
+      margin: 80px auto;
+      padding: 40px;
+      background-color: #ffffff;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      border-radius: 16px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2.5em;
+      color: #003e8a;
+      margin-bottom: 20px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 1.2em;
+    }
+    th, td {
+      padding: 16px;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    th {
+      background-color: #003e8a;
+      color: white;
+    }
+    .qr-section {
+      margin-top: 40px;
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+    }
+    .qr-box {
+      text-align: center;
+    }
+    .qr-box img {
+      width: 160px;
+      height: 160px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+    }
+    .qr-box p {
+      margin-top: 10px;
+      font-size: 0.95em;
+      color: #333;
+    }
+    .footer {
+      margin-top: 30px;
+      font-size: 0.9em;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 IBK 기업은행 실시간 환율</h1>
+    <table id="exchangeTable">
+      <thead>
+        <tr>
+          <th>통화</th>
+          <th>환율</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>USD/KRW</td><td id="usd">로딩 중...</td></tr>
+        <tr><td>JPY/KRW</td><td id="jpy">로딩 중...</td></tr>
+        <tr><td>EUR/KRW</td><td id="eur">로딩 중...</td></tr>
+      </tbody>
+    </table>
+
+    <div class="qr-section">
+      <div class="qr-box">
+        <a href="https://play.google.com/store/apps/details?id=com.ibk.android.ionebank" target="_blank">
+          <img src="qr_android.jpg" alt="안드로이드용 QR코드">
+        </a>
+        <p>안드로이드 앱 다운로드</p>
+      </div>
+      <div class="qr-box">
+        <a href="https://apps.apple.com/kr/app/i-one-bank-%EA%B0%9C%EC%9D%B8%EA%B3%A0%EA%B0%9D%EC%9A%A9/id1460543865" target="_blank">
+          <img src="qr_ios.jpg" alt="iOS용 QR코드">
+        </a>
+        <p>iOS 앱 다운로드</p>
+      </div>
+    </div>
+
+    <div class="footer">※ 본 환율은 실시간 API를 통해 제공되며, 5분마다 자동 갱신됩니다.</div>
+  </div>
+
+  <script>
+    async function fetchRates() {
+      try {
+        const response = await fetch('https://api.exchangerate.host/latest?base=USD&symbols=KRW,JPY,EUR');
+        const data = await response.json();
+        document.getElementById('usd').textContent = data.rates.KRW.toFixed(2);
+        document.getElementById('jpy').textContent = (data.rates.JPY * 100).toFixed(2);
+        document.getElementById('eur').textContent = (data.rates.EUR / data.rates.KRW).toFixed(2);
+      } catch (error) {
+        document.getElementById('usd').textContent = '데이터 오류';
+        document.getElementById('jpy').textContent = '데이터 오류';
+        document.getElementById('eur').textContent = '데이터 오류';
+        console.error('환율 정보를 불러오는 중 오류 발생:', error);
+      }
+    }
+    fetchRates();
+  </script>
+</body>
+</html>
