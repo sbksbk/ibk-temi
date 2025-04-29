@@ -1,0 +1,41 @@
+{
+  "steps": [
+    {
+      "sayText": "테스트1",
+      "saySize": "16",
+      "sayFont": "Arial",
+      "textAnim": "none",
+      "sayColor": "#000000",
+      "sayBold": false,
+      "sayBlink": false,
+      "showMedia": {
+        "name": "손흥민.jpg",
+        "type": "image/jpeg"
+      },
+      "showBgColor": "#FFFFFF",
+      "audio": null,
+      "duration": 10
+    },
+    {
+      "sayText": "테스트2",
+      "saySize": "16",
+      "sayFont": "Arial",
+      "textAnim": "none",
+      "sayColor": "#000000",
+      "sayBold": false,
+      "sayBlink": false,
+      "showMedia": {
+        "name": "범죄도시.jpeg",
+        "type": "image/jpeg"
+      },
+      "showBgColor": "#FFFFFF",
+      "audio": {
+        "name": "아로하.mp4",
+        "type": "video/mp4"
+      },
+      "duration": 10
+    }
+  ],
+  "repeatMode": "infinite",
+  "repeatCount": -1
+}
