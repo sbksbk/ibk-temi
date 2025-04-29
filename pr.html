@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>박스형 블록 UI - 테미 시퀀스 (Enhanced)</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; background-color: #f5f5f5; margin: 0; }
+    .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    .controls button { padding: 10px 20px; background: #00acc1; color: white; border: none; border-radius: 8px; cursor: pointer; }
+    .step-container { display: flex; flex-direction: column; gap: 10px; max-width: 800px; margin: auto; }
+    .step { background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 15px; position: relative; }
+    .step-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 10px; cursor: move; }
+    .block-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+    .block-col { background: #fafafa; border: 1px solid #ddd; border-radius: 8px; padding: 10px; position: relative; }
+    .block-col label { display: block; margin-bottom: 5px; font-weight: bold; }
+    .color-palette { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 5px; }
+    .swatch { width: 20px; height: 20px; border-radius: 50%; cursor: pointer; border: 2px solid transparent; }
+    .swatch.selected { border-color: #333; }
+    .drop-zone { border: 2px dashed #ccc; padding: 10px; border-radius: 5px; text-align: center; color: #999; position: relative; cursor: pointer; }
+    .drop-zone.dragover { background: #eef; }
+    .preview { margin-top: 5px; font-size: 12px; color: #333; position: relative; }
+    .preview img, .preview video, .preview audio { max-width: 100%; margin-top: 5px; display: block; }
+    .clear-btn { position: absolute; top: 5px; right: 5px; background: #e74c3c; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 14px; line-height: 18px; text-align: center; }
+
+    /* Simulation Modal Styles */
+    #simulationArea {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent overlay */
+        display: none; /* Initially hidden */
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        overflow: auto; /* Allow scrolling if content is large */
+        padding: 20px;
+    }
+
+    #simulationArea .simulation-content-wrapper { /* Added wrapper for the actual content */
+        background-color: white; /* Modal background */
+        color: #333; /* Text color inside modal */
+        padding: 0; /* Remove padding here, content will manage its spacing */
+        border-radius: 10px;
+        /* --- 화면 크기의 60%로 조정 --- */
+        width: 60vw;
+        height: 60vh;
+        max-width: 95vw; /* Ensure it doesn't exceed viewport width */
+        max-height: 95vh; /* Ensure it doesn't exceed viewport height */
+        /* --- 크기 조정 끝 --- */
+        overflow: hidden; /* Hide overflow, content inside will manage scrolling */
+        position: relative; /* For close button positioning */
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        display: flex; /* Center content inside wrapper */
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    #simulationArea .simulation-content {
+        text-align: center;
+        width: 100%; /* Ensure content takes full width of wrapper */
+        height: 100%; /* Ensure content takes full height of wrapper */
+        display: flex; /* Use flexbox for content alignment */
+        flex-direction: column;
+        justify-content: center; /* Center content vertically */
+        align-items: center; /* Center content horizontally */
+        overflow: auto; /* Add scroll if content exceeds area */
+        padding: 20px; /* Add padding inside the content area */
+    }
+
+
+    #simulationArea img,
+    #simulationArea video {
+        max-width: 100%;
+        max-height: 100%; /* Allow media to take full height if needed */
+        object-fit: contain; /* Maintain aspect ratio */
+        margin-bottom: 15px; /* Space below media */
+    }
+
+    #simulationArea audio {
+        margin-top: 15px;
+    }
+
+    #simulationArea .simulation-content p {
+        margin: 0 0 15px 0; /* Space below text */
+         word-break: break-word; /* Prevent long words from overflowing */
+    }
+
+    .close-simulation {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: #e74c3c;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        font-size: 20px;
+        cursor: pointer;
+        z-index: 1001;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        line-height: 1; /* Center the X */
+    }
+
+
+    @keyframes blink { 50% { visibility: hidden; } }
+    @keyframes typing { from { width: 0; } to { width: 100%; } }
+    @keyframes slide-in { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .typing { overflow: hidden; white-space: nowrap; border-right: 2px solid; animation: typing 2s steps(20), blink .7s step-end infinite; }
+    .slide { animation: slide-in 0.5s ease-out; }
+
+     /* Added style for background color preview swatch */
+    .bg-color-swatch-preview {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+        margin-top: 5px;
+        box-sizing: border-box; /* Include border in size */
+    }
+
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&family=Nanum+Gothic&family=Roboto&display=swap" rel="stylesheet">
+</head>
+<body>
+  <h1>📦 박스형 블록 UI (Enhanced)</h1>
+  <div class="controls">
+    <button onclick="addStep()">+ 단계 추가</button>
+    <button onclick="saveScenario()">시나리오 저장</button>
+    <button onclick="loadScenario()">시나리오 불러오기</button>
+    <button onclick="startSimulation()">시뮬레이션 시작</button>
+      <label for="repeatMode">반복:</label>
+      <select id="repeatMode">
+        <option value="infinite">무한</option>
+        <option value="1">1번</option>
+        <option value="2">2번</option>
+        <option value="3">3번</option>
+        <option value="4">4번</option>
+      </select>
+  </div>
+  <div id="stepContainer" class="step-container"></div>
+  <div id="simulationArea">
+      <div class="simulation-content-wrapper"> <button class="close-simulation" onclick="stopSimulation()">X</button>
+          <div class="simulation-content"></div>
+      </div>
+  </div>
+  <div id="timeline"></div>
+
+  <script>
+    const colors = ['#000000','#FF0000','#FFA500','#FFFF00','#008000','#00FFFF','#0000FF','#800080','#FFC0CB','#A52A2A', '#FFFFFF', '#CCCCCC', '#808080']; // 배경색 추가
+    let stepCount = 0;
+    const stepContainer = document.getElementById('stepContainer');
+    const simulationArea = document.getElementById('simulationArea');
+    const simulationContent = simulationArea.querySelector('.simulation-content');
+    const simulationContentWrapper = simulationArea.querySelector('.simulation-content-wrapper'); // Get the wrapper
+    let currentSimulationStep = 0;
+    let simulationInterval;
+    let currentAudio = null;
+    let currentMedia = null; // Track current media element for stopping video
+
+    let repeatMode = 'infinite'; // Default
+    let repeatCount = 0;
+    let currentRepeat = 0;
+
+    // Initialize Sortable and add listener for end of drag-and-drop
+    new Sortable(stepContainer, {
+        handle: '.step-header',
+        animation: 150,
+        onEnd: function (evt) {
+            updateStepNumbers(); // Update numbers after drop
+        }
+    });
+
+     // Add event listener for repeat mode change
+    document.getElementById('repeatMode').addEventListener('change', function() {
+        repeatMode = this.value;
+        if (repeatMode !== 'infinite') {
+            repeatCount = parseInt(repeatMode);
+        }
+        console.log('Repeat mode set to:', repeatMode, 'Count:', repeatCount);
+    });
+
+
+    function addStep(data) {
+      stepCount++;
+      const d = data || {};
+      const stepDiv = document.createElement('div');
+      stepDiv.className = 'step';
+      stepDiv.innerHTML = `
+        <div class="step-header">
+          단계 ${stepCount}
+          <button class="delete-btn" onclick="deleteStep(this)">삭제</button>
+        </div>
+        <div class="block-row">
+          <div class="block-col">
+            <label>말하기</label>
+            <input type="text" class="say-text" value="${d.sayText||''}" placeholder="텍스트 입력"><br>
+            <label>크기(px)</label>
+            <input type="number" class="say-size" min="10" max="100" value="${d.saySize||16}"><br>
+            <select class="say-font">
+              <option value="Arial">Arial</option>
+              <option value="Courier New">Courier New</option>
+              <option value="Georgia">Georgia</option>
+              <option value="Roboto, sans-serif">Roboto</option>
+              <option value="Noto Sans KR, sans-serif">NotoSansKR</option>
+              <option value="Nanum Gothic, sans-serif">NanumGothic</option>
+            </select><br>
+            <select class="text-anim">
+              <option value="none">애니메이션 없음</option>
+              <option value="typing">타이핑</option>
+              <option value="slide">슬라이드 인</option>
+            </select><br>
+            <div class="color-palette say-palette"></div>
+            <input type="hidden" class="say-color-value" value="${d.sayColor||'#000000'}">
+            <label><input type="checkbox" class="say-bold" ${d.sayBold?'checked':''}> 진하게</label><br>
+            <label><input type="checkbox" class="say-blink" ${d.sayBlink?'checked':''}> 반짝임</label>
+            <div class="preview say-preview"></div>
+          </div>
+          <div class="block-col show-block"> <label>표시</label>
+            <div class="drop-zone">
+              이미지/영상 드롭 또는 클릭
+              <input type="file" class="show-media" accept="image/*,video/*" style="display:none"> </div>
+            <div class="preview show-media-preview"></div>
+            <label>배경색</label> <div class="color-palette show-bg-palette"></div> <input type="hidden" class="show-bg-color-value" value="${d.showBgColor||'#FFFFFF'}"> </div>
+          <div class="block-col">
+            <label>오디오</label>
+            <div class="drop-zone">
+              음원 드롭 또는 클릭
+              <input type="file" class="audio-file" accept="audio/*" style="display:none">
+            </div>
+            <div class="preview audio-preview"></div>
+          </div>
+          <div class="block-col">
+            <label>시간(초)</label>
+            <input type="number" class="step-duration" min="1" value="${d.duration||5}">
+          </div>
+        </div>`;
+      stepContainer.appendChild(stepDiv);
+      stepDiv.querySelector('.say-font').value = d.sayFont||'Arial';
+      initPalette(stepDiv.querySelector('.say-palette'), 'say-color-value');
+       initPalette(stepDiv.querySelector('.show-bg-palette'), 'show-bg-color-value', updateShowPreview); // Init background color palette
+      initDropZones(stepDiv);
+      initPreviews(stepDiv);
+      updateStepNumbers(); // Update numbers when a new step is added
+    }
+
+    function initPalette(container, valueClass, updateFn = updateSayPreview) { // Added optional updateFn
+      const stepDiv = container.closest('.step');
+      colors.forEach(c=>{
+        const sw = document.createElement('div'); sw.className='swatch'; sw.style.background=c; sw.dataset.color=c;
+        if(stepDiv.querySelector('.'+valueClass).value===c) sw.classList.add('selected');
+        sw.addEventListener('click',()=>{
+          container.querySelectorAll('.swatch').forEach(x=>x.classList.remove('selected'));
+          sw.classList.add('selected');
+          stepDiv.querySelector('.'+valueClass).value=c;
+          updateFn(stepDiv); // Call the appropriate update function
+        });
+        container.appendChild(sw);
+      });
+    }
+
+    function initDropZones(stepDiv) {
+      stepDiv.querySelectorAll('.drop-zone').forEach(zone=>{
+        const input = zone.querySelector('input[type=file]');
+        zone.addEventListener('click',()=>input.click());
+        zone.addEventListener('dragover',e=>{ e.preventDefault(); zone.classList.add('dragover'); });
+        zone.addEventListener('dragleave',()=>zone.classList.remove('dragover'));
+        zone.addEventListener('drop',e=>{ e.preventDefault(); zone.classList.remove('dragover'); input.files=e.dataTransfer.files; updatePreview(zone.closest('.step')); });
+        input.addEventListener('change',()=>updatePreview(zone.closest('.step')));
+      });
+    }
+
+    function initPreviews(stepDiv) {
+      stepDiv.querySelector('.say-text').addEventListener('input',()=>updateSayPreview(stepDiv));
+      ['say-size','say-font','say-color-value','say-bold','say-blink','text-anim'].forEach(cls=>{
+        stepDiv.querySelector('.'+cls).addEventListener('change',()=>updateSayPreview(stepDiv));
+      });
+      // Update show preview when background color changes
+      stepDiv.querySelector('.show-bg-color-value').addEventListener('change', () => updateShowPreview(stepDiv));
+      updateSayPreview(stepDiv);
+      updatePreview(stepDiv); // This now handles both media and background color for the show block
+    }
+
+    function updateSayPreview(stepDiv) {
+      const preview = stepDiv.querySelector('.say-preview'); preview.innerHTML='';
+      const text = stepDiv.querySelector('.say-text').value; if(!text) return;
+      const p = document.createElement('p'); p.textContent = text;
+      p.style.fontFamily = stepDiv.querySelector('.say-font').value;
+      p.style.color = stepDiv.querySelector('.say-color-value').value;
+      p.style.fontWeight = stepDiv.querySelector('.say-bold').checked ? 'bold' : '';
+      p.style.fontSize = stepDiv.querySelector('.say-size').value + 'px';
+      if(stepDiv.querySelector('.say-blink').checked) p.style.animation='blink 1s step-start infinite';
+      const anim = stepDiv.querySelector('.text-anim').value;
+      if(anim==='typing') {
+         p.style.overflow = 'hidden';
+         p.style.whiteSpace = 'nowrap';
+         p.style.borderRight = '2px solid';
+         p.style.animation = 'typing ' + (text.length * 0.1) + 's steps(' + text.length + '), blink .7s step-end infinite';
+         p.style.animationFillMode = 'forwards';
+      }
+      if(anim==='slide') {
+         p.style.animation = (p.style.animation ? p.style.animation + ', ' : '') + 'slide-in 0.5s ease-out';
+         p.style.animationFillMode = 'forwards';
+      }
+      preview.appendChild(p);
+    }
+
+     function updateShowPreview(stepDiv) {
+        // 이미지/영상 미리보기
+        const mediaPrev = stepDiv.querySelector('.show-media-preview');
+        mediaPrev.innerHTML = '';
+        const mediaInput = stepDiv.querySelector('.show-media');
+        if (mediaInput.files[0]) {
+            const file = mediaInput.files[0];
+            const url = URL.createObjectURL(file);
+            let mediaElement;
+            if (file.type.startsWith('image/')) {
+                mediaElement = document.createElement('img');
+                mediaElement.src = url;
+            } else if (file.type.startsWith('video/')) {
+                mediaElement = document.createElement('video');
+                mediaElement.src = url;
+                mediaElement.controls = true;
+            }
+            if (mediaElement) {
+                mediaPrev.appendChild(mediaElement);
+                const btn = document.createElement('button');
+                btn.textContent = 'X';
+                btn.className = 'clear-btn';
+                btn.addEventListener('click', () => {
+                    mediaInput.value = '';
+                    updatePreview(stepDiv);
+                });
+                mediaPrev.appendChild(btn);
+            }
+        }
+
+        // 배경색 업데이트 (미리보기 영역에 직접 적용은 아님, 데이터만 저장)
+        const showBlock = stepDiv.querySelector('.show-block'); // Get the show block
+        const bgColorInput = stepDiv.querySelector('.show-bg-color-value');
+         // Add a small swatch showing the selected color
+        const colorSwatch = document.createElement('div');
+        colorSwatch.style.width = '20px';
+        colorSwatch.style.height = '20px';
+        colorSwatch.style.backgroundColor = bgColorInput.value;
+        colorSwatch.style.border = '1px solid #ccc';
+        colorSwatch.style.marginTop = '5px';
+         colorSwatch.style.borderRadius = '4px';
+         const existingSwatch = showBlock.querySelector('.bg-color-swatch-preview');
+         if(existingSwatch) existingSwatch.remove();
+         colorSwatch.className = 'bg-color-swatch-preview';
+         showBlock.appendChild(colorSwatch);
+    }
+
+
+    function updatePreview(stepDiv) {
+      // This function now just calls the specific update functions
+      updateSayPreview(stepDiv);
+      updateShowPreview(stepDiv);
+
+      // 오디오 미리보기 (remains the same)
+      const audioPrev = stepDiv.querySelector('.audio-preview'); audioPrev.innerHTML='';
+      const audioInput = stepDiv.querySelector('.audio-file'); if(audioInput.files[0]){
+        const url=URL.createObjectURL(audioInput.files[0]); const aud=document.createElement('audio'); aud.src=url; aud.controls=true; audioPrev.appendChild(aud);
+        const btn=document.createElement('button'); btn.textContent='X'; btn.className='clear-btn';
+        btn.addEventListener('click',()=>{ audioInput.value=''; updatePreview(stepDiv); }); audioPrev.appendChild(btn);
+      }
+    }
+
+
+    function deleteStep(btn){
+        btn.closest('.step').remove();
+        updateStepNumbers(); // Update step numbers after deletion
+    }
+
+    function updateStepNumbers() {
+        const steps = stepContainer.querySelectorAll('.step');
+        steps.forEach((step, index) => {
+            step.querySelector('.step-header').childNodes[0].nodeValue = `단계 ${index + 1}`;
+        });
+        stepCount = steps.length;
+    }
+
+
+    function saveScenario() {
+        const stepsData = [];
+        const steps = stepContainer.querySelectorAll('.step');
+
+        steps.forEach(step => {
+            const sayText = step.querySelector('.say-text').value;
+            const saySize = step.querySelector('.say-size').value;
+            const sayFont = step.querySelector('.say-font').value;
+            const textAnim = step.querySelector('.text-anim').value;
+            const sayColor = step.querySelector('.say-color-value').value;
+            const sayBold = step.querySelector('.say-bold').checked;
+            const sayBlink = step.querySelector('.say-blink').checked;
+
+            const showMediaInput = step.querySelector('.show-media');
+            const showMediaFile = showMediaInput.files[0];
+            const showMedia = showMediaFile ? { name: showMediaFile.name, type: showMediaFile.type } : null; // Save media info
+            const showBgColor = step.querySelector('.show-bg-color-value').value;
+
+
+            const audioInput = step.querySelector('.audio-file');
+            const audioFile = audioInput.files[0];
+            const audio = audioFile ? { name: audioFile.name, type: audioFile.type } : null; // Save audio info
+
+
+            const duration = step.querySelector('.step-duration').value;
+
+            stepsData.push({
+                sayText,
+                saySize,
+                sayFont,
+                textAnim,
+                sayColor,
+                sayBold,
+                sayBlink,
+                showMedia,
+                showBgColor,
+                audio,
+                duration
+            });
+        });
+
+        // Save to localStorage
+        localStorage.setItem('temiScenario', JSON.stringify(stepsData));
+        alert('시나리오가 저장되었습니다!');
+        console.log('Saved Scenario:', stepsData);
+    }
+
+    function loadScenario() {
+        const savedScenario = localStorage.getItem('temiScenario');
+        if (savedScenario) {
+            const stepsData = JSON.parse(savedScenario);
+            stepContainer.innerHTML = ''; // Clear current steps
+            stepCount = 0; // Reset step count
+
+            stepsData.forEach(data => {
+                addStep(data); // Add step with loaded data
+
+                // Re-populate file names for preview (cannot load actual files from localStorage)
+                const lastStep = stepContainer.querySelector('.step:last-child');
+                 if(data.showMedia) {
+                     const mediaPrev = lastStep.querySelector('.show-media-preview');
+                     mediaPrev.innerHTML = `<div>${data.showMedia.name} (${data.showMedia.type})</div>`;
+                     const btn = document.createElement('button');
+                     btn.textContent = 'X'; btn.className = 'clear-btn';
+                     btn.addEventListener('click', () => { lastStep.querySelector('.show-media').value = ''; updatePreview(lastStep); });
+                     mediaPrev.appendChild(btn);
+                 }
+                 if(data.audio) {
+                     const audioPrev = lastStep.querySelector('.audio-preview');
+                     audioPrev.innerHTML = `<div>${data.audio.name} (${data.audio.type})</div>`;
+                     const btn = document.createElement('button');
+                     btn.textContent = 'X'; btn.className = 'clear-btn';
+                     btn.addEventListener('click', () => { lastStep.querySelector('.audio-file').value = ''; updatePreview(lastStep); });
+                     audioPrev.appendChild(btn);
+                 }
+                 // Re-initialize background color preview swatch
+                 updateShowPreview(lastStep);
+            });
+            updateStepNumbers(); // Ensure step numbers are correct after loading
+            alert('시나리오를 불러왔습니다!');
+        } else {
+            alert('저장된 시나리오가 없습니다.');
+        }
+    }
+
+    function startSimulation() {
+        const steps = stepContainer.querySelectorAll('.step');
+        if (steps.length === 0) {
+            alert('시뮬레이션을 시작할 단계가 없습니다. 단계를 추가해주세요.');
+            return;
+        }
+
+        simulationArea.style.display = 'flex'; // Show simulation area (now a modal overlay)
+        currentSimulationStep = 0;
+        currentRepeat = 0; // Reset repeat counter
+
+        // Get repeat mode and count
+        repeatMode = document.getElementById('repeatMode').value;
+        if (repeatMode !== 'infinite') {
+            repeatCount = parseInt(repeatMode);
+        }
+
+        executeSimulationStep();
+    }
+
+    function executeSimulationStep() {
+         // Clear previous media if any
+         if (currentMedia) {
+             if (currentMedia.tagName === 'VIDEO') {
+                 currentMedia.pause();
+             }
+             currentMedia.remove();
+             currentMedia = null;
+         }
+         // Clear previous audio if any
+         if (currentAudio) {
+             currentAudio.pause();
+             currentAudio.remove();
+             currentAudio = null;
+         }
+
+        const steps = stepContainer.querySelectorAll('.step');
+
+        // --- Check for end of sequence or repeat ---
+        if (currentSimulationStep >= steps.length) {
+            // Finished one full sequence of steps
+            currentRepeat++; // Increment repeat counter
+
+            if (repeatMode === 'infinite' || currentRepeat < repeatCount) {
+                // If infinite or more repeats are needed, reset to the first step
+                currentSimulationStep = 0;
+                 // Optional: Briefly clear screen or show a transition before repeating
+                 simulationContent.innerHTML = '';
+                 simulationContentWrapper.style.backgroundColor = ''; // Clear background color
+                 // Delay before starting the first step of the next repeat cycle
+                 simulationInterval = setTimeout(executeSimulationStep, 500); // 500ms delay before repeating
+                return; // Stop current execution cycle, new one will start after delay
+            } else {
+                // Finished all required repeats
+                stopSimulation();
+                return;
+            }
+        }
+         // --- End Check ---
+
+
+        const currentStep = steps[currentSimulationStep];
+        const duration = parseInt(currentStep.querySelector('.step-duration').value) * 1000; // Duration in milliseconds
+
+        simulationContent.innerHTML = ''; // Clear previous content
+        simulationContentWrapper.style.backgroundColor = currentStep.querySelector('.show-bg-color-value').value; // Apply background color to the wrapper
+
+
+        // Display "말하기" content
+        const sayText = currentStep.querySelector('.say-text').value;
+         if (sayText) {
+            const p = document.createElement('p');
+            p.textContent = sayText;
+            p.style.fontFamily = currentStep.querySelector('.say-font').value;
+            p.style.color = currentStep.querySelector('.say-color-value').value;
+            p.style.fontWeight = currentStep.querySelector('.say-bold').checked ? 'bold' : '';
+            p.style.fontSize = currentStep.querySelector('.say-size').value + 'px';
+
+            const anim = currentStep.querySelector('.text-anim').value;
+             if(anim === 'typing') {
+                 p.style.overflow = 'hidden';
+                 p.style.whiteSpace = 'nowrap';
+                 p.style.borderRight = '2px solid'; // Add cursor effect
+                 p.style.animation = `typing ${sayText.length * 0.1}s steps(${sayText.length}), blink .7s step-end infinite`; // Adjust typing speed based on text length
+                 p.style.animationFillMode = 'forwards'; // Keep the text visible after typing
+             } else if (anim === 'slide') {
+                 p.style.animation = `slide-in 0.5s ease-out`;
+                 p.style.animationFillMode = 'forwards'; // Keep the element visible after sliding
+             }
+
+             if(currentStep.querySelector('.say-blink').checked) {
+                 p.style.animation = (p.style.animation ? p.style.animation + ', ' : '') + 'blink 1s step-start infinite';
+             }
+             simulationContent.appendChild(p);
+        }
+
+
+        // Display "표시" media (Image/Video) - Load from file input directly for simulation
+         const showMediaInput = currentStep.querySelector('.show-media');
+         if (showMediaInput.files[0]) {
+             const file = showMediaInput.files[0];
+             const url = URL.createObjectURL(file);
+             if (file.type.startsWith('image/')) {
+                 currentMedia = document.createElement('img');
+                 currentMedia.src = url;
+             } else if (file.type.startsWith('video/')) {
+                 currentMedia = document.createElement('video');
+                 currentMedia.src = url;
+                 currentMedia.controls = true; // Show controls for simulation
+                 currentMedia.autoplay = true; // Autoplay video in simulation
+                 // Removed onended listener to rely only on step duration for advancement
+             }
+             if (currentMedia) {
+                 simulationContent.appendChild(currentMedia);
+             }
+         }
+
+
+        // Play "오디오" content - Load from file input directly for simulation
+         const audioInput = currentStep.querySelector('.audio-file');
+         if (audioInput.files[0]) {
+             const url = URL.createObjectURL(audioInput.files[0]);
+             currentAudio = new Audio(url);
+             currentAudio.play();
+         }
+
+
+        // Set timeout for the step duration
+        simulationInterval = setTimeout(() => {
+            currentSimulationStep++;
+            executeSimulationStep(); // Move to the next step
+        }, duration);
+    }
+
+    function stopSimulation() {
+        clearTimeout(simulationInterval);
+        simulationArea.style.display = 'none'; // Hide simulation area
+        simulationContent.innerHTML = ''; // Clear content
+        simulationContentWrapper.style.backgroundColor = ''; // Clear background color
+         if (currentAudio) {
+             currentAudio.pause();
+             currentAudio.remove();
+             currentAudio = null;
+         }
+         if (currentMedia) {
+             if (currentMedia.tagName === 'VIDEO') {
+                 currentMedia.pause();
+             }
+             currentMedia.remove();
+             currentMedia = null;
+         }
+         currentSimulationStep = 0; // Reset step for next simulation start
+         currentRepeat = 0; // Reset repeat count
+    }
+
+    // Initial step when the page loads
+    addStep();
+  </script>
+</body>
+</html>

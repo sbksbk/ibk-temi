@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>테미 시퀀스 (Display)</title>
+  <style>
+    body { margin: 0; overflow: hidden; background-color: black; color: white; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; width: 100vw; }
+
+    /* Simulation Area Styles (Full Screen) */
+    #simulationArea {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: black; /* Default background */
+        color: white;
+        display: flex; /* Use flexbox to center content */
+        flex-direction: column;
+        justify-content: center; /* Center content vertically */
+        align-items: center; /* Center content horizontally */
+        z-index: 1000;
+        overflow: hidden; /* Hide any overflow */
+    }
+
+    #simulationArea .simulation-content {
+        text-align: center;
+        width: 100%; /* Take full width */
+        height: 100%; /* Take full height */
+        display: flex; /* Use flexbox for content alignment */
+        flex-direction: column;
+        justify-content: center; /* Center content vertically */
+        align-items: center; /* Center content horizontally */
+        overflow: auto; /* Add scroll if content exceeds area */
+        padding: 20px; /* Add some padding */
+    }
+
+    #simulationArea img,
+    #simulationArea video {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain; /* Maintain aspect ratio */
+        margin: 0; /* Remove margin */
+    }
+
+    #simulationArea audio {
+        margin-top: 20px; /* Space below audio controls if they appear */
+    }
+
+    #simulationArea .simulation-content p {
+        margin: 0; /* Remove margin */
+         word-break: break-word; /* Prevent long words from overflowing */
+    }
+
+    /* Animation Styles */
+    @keyframes blink { 50% { visibility: hidden; } }
+    @keyframes typing { from { width: 0; } to { width: 100%; } }
+    @keyframes slide-in { from { transform: translateX(-100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .typing { overflow: hidden; white-space: nowrap; border-right: 2px solid; animation: typing 2s steps(20), blink .7s step-end infinite; }
+    .slide { animation: slide-in 0.5s ease-out; }
+
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&family=Nanum+Gothic&family=Roboto&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div id="simulationArea">
+      <div class="simulation-content"></div>
+  </div>
+
+  <script>
+    let currentSimulationStep = 0;
+    let simulationInterval;
+    let currentAudio = null;
+    let currentMedia = null; // Track current media element for stopping video
+
+    const simulationArea = document.getElementById('simulationArea');
+    const simulationContent = simulationArea.querySelector('.simulation-content');
+
+    // Load scenario data (from localStorage for this example, but needs server for Temi)
+    function loadScenarioData() {
+        // *** 중요: 이 부분은 현재 localStorage에서 데이터를 불러옵니다. ***
+        // *** 테미 로봇이 관리자 페이지에서 저장한 데이터를 사용하려면 서버가 필요합니다. ***
+        // *** 서버가 구축되면 이 코드는 서버에서 데이터를 가져오도록 수정되어야 합니다. ***
+        const savedScenario = localStorage.getItem('temiScenario');
+        if (savedScenario) {
+            return JSON.parse(savedScenario);
+        }
+        return null; // Return null if no data found
+    }
+
+    // Get scenario data when page loads
+    const scenarioData = loadScenarioData();
+
+    // Auto-start simulation if data is available
+    if (scenarioData && scenarioData.length > 0) {
+         // 시뮬레이션 표시 페이지에서는 반복 설정을 따로 하지 않고, 무한 반복을 기본으로 가정합니다.
+         // 만약 시나리오 데이터에 반복 설정이 포함된다면 해당 설정을 따르도록 수정해야 합니다.
+        executeSimulationStepDisplay(scenarioData); // Start the simulation display
+    } else {
+        simulationContent.innerHTML = "<p>표시할 시나리오 데이터가 없습니다.</p>";
+         simulationContent.style.color = 'white'; // Ensure message is visible on black background
+         simulationContent.style.fontSize = '2em';
+    }
+
+
+    // --- Simulation Execution Function (for display page) ---
+    // This is similar to the one in promo8.html but simplified for display
+    function executeSimulationStepDisplay(stepsData) {
+         // Clear previous media if any
+         if (currentMedia) {
+             if (currentMedia.tagName === 'VIDEO') {
+                 currentMedia.pause();
+             }
+             currentMedia.remove();
+             currentMedia = null;
+         }
+         // Clear previous audio if any
+         if (currentAudio) {
+             currentAudio.pause();
+             currentAudio.remove();
+             currentAudio = null;
+         }
+
+
+        if (currentSimulationStep >= stepsData.length) {
+            // Finished one full sequence of steps
+             // For simulation display page, let's assume infinite repeat for now
+             // With server, the scenario data would specify repeat count/mode
+            currentSimulationStep = 0; // Reset to the first step
+             // Optional: Briefly clear screen or show a transition before repeating
+             simulationContent.innerHTML = '';
+             simulationArea.style.backgroundColor = 'black'; // Reset background
+
+             // Delay before starting the first step of the next repeat cycle
+             simulationInterval = setTimeout(() => executeSimulationStepDisplay(stepsData), 500); // 500ms delay before repeating
+            return; // Stop current execution cycle, new one will start after delay
+        }
+
+
+        const currentStep = stepsData[currentSimulationStep];
+        const duration = parseInt(currentStep.duration) * 1000; // Duration in milliseconds (Data comes from loaded object)
+
+        simulationContent.innerHTML = ''; // Clear previous content
+        simulationArea.style.backgroundColor = currentStep.showBgColor; // Apply background color to the main simulation area
+
+
+        // Display "말하기" content
+         const sayText = currentStep.sayText;
+         if (sayText) {
+            const p = document.createElement('p');
+            p.textContent = sayText;
+            p.style.fontFamily = currentStep.sayFont;
+            p.style.color = currentStep.sayColor;
+            p.style.fontWeight = currentStep.sayBold ? 'bold' : '';
+            p.style.fontSize = currentStep.saySize + 'px';
+
+            const anim = currentStep.textAnim;
+             if(anim === 'typing') {
+                 p.style.overflow = 'hidden';
+                 p.style.whiteSpace = 'nowrap';
+                 p.style.borderRight = '2px solid'; // Add cursor effect
+                 p.style.animation = `typing ${sayText.length * 0.1}s steps(${sayText.length}), blink .7s step-end infinite`; // Adjust typing speed based on text length
+                 p.style.animationFillMode = 'forwards'; // Keep the text visible after typing
+             } else if (anim === 'slide') {
+                 p.style.animation = `slide-in 0.5s ease-out`;
+                 p.style.animationFillMode = 'forwards'; // Keep the element visible after sliding
+             }
+
+             if(currentStep.sayBlink) {
+                 p.style.animation = (p.style.animation ? p.style.animation + ', ' : '') + 'blink 1s step-start infinite';
+             }
+             simulationContent.appendChild(p);
+        }
+
+
+        // Display "표시" media (Image/Video) - Note: Cannot load files from saved path without server
+         // 현재 localStorage 방식으로는 파일 내용을 저장하지 못하므로, 실제 미디어 표시가 어렵습니다.
+         // 서버를 사용하면 파일을 저장하고 URL을 통해 불러올 수 있습니다.
+         // 여기서는 데이터에 미디어 정보가 있다면 파일 이름만 표시하도록 하겠습니다.
+         if (currentStep.showMedia) {
+              const p = document.createElement('p');
+              p.textContent = `[미디어 파일: ${currentStep.showMedia.name}]`;
+              p.style.color = 'gray';
+              simulationContent.appendChild(p);
+              // 만약 미디어 파일의 URL이 있다면 여기에 <img> 또는 <video> 태그를 생성하고 src를 설정하면 됩니다.
+              // 예: if (currentStep.showMedia.url) { const img = document.createElement('img'); img.src = currentStep.showMedia.url; simulationContent.appendChild(img); }
+         }
+
+
+        // Play "오디오" content - Note: Cannot load audio files from saved path without server
+         // 미디어 파일과 마찬가지로, 서버를 통해 오디오 파일 URL을 제공해야 재생 가능합니다.
+         if (currentStep.audio) {
+             const p = document.createElement('p');
+             p.textContent = `[오디오 파일: ${currentStep.audio.name}]`;
+             p.style.color = 'gray';
+             simulationContent.appendChild(p);
+             // 만약 오디오 파일의 URL이 있다면 여기에 <audio> 태그를 생성하고 src를 설정하면 됩니다.
+              // 예: if (currentStep.audio.url) { currentAudio = new Audio(currentStep.audio.url); currentAudio.play(); }
+         }
+
+
+        // Set timeout for the step duration
+        simulationInterval = setTimeout(() => {
+            currentSimulationStep++;
+            executeSimulationStepDisplay(stepsData); // Move to the next step
+        }, duration);
+    }
+
+     // Function to stop simulation (might be needed if Temi has a way to stop)
+    function stopSimulationDisplay() {
+        clearTimeout(simulationInterval);
+        simulationContent.innerHTML = ''; // Clear content
+        simulationArea.style.backgroundColor = 'black'; // Reset background
+         if (currentAudio) {
+             currentAudio.pause();
+             currentAudio.remove();
+             currentAudio = null;
+         }
+         if (currentMedia) {
+             if (currentMedia.tagName === 'VIDEO') {
+                 currentMedia.pause();
+             }
+             currentMedia.remove();
+             currentMedia = null;
+         }
+         currentSimulationStep = 0; // Reset step for next simulation start
+    }
+
+    // Optional: Add a listener for a custom event from Temi to stop simulation
+    // window.addEventListener('temi-stop-simulation', stopSimulationDisplay);
+
+
+  </script>
+</body>
+</html>
