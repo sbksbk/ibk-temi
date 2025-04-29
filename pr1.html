@@ -9,6 +9,8 @@
     body { font-family: sans-serif; padding: 20px; background-color: #f5f5f5; margin: 0; }
     .controls { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
     .controls button { padding: 10px 20px; background: #00acc1; color: white; border: none; border-radius: 8px; cursor: pointer; }
+    .controls input[type="text"] { padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-right: 5px; } /* Style for URL input */
+
     .step-container { display: flex; flex-direction: column; gap: 10px; max-width: 800px; margin: auto; }
     .step { background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); padding: 15px; position: relative; }
     .step-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 10px; cursor: move; }
@@ -31,75 +33,78 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.7);
-        display: none;
+        background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent overlay */
+        display: none; /* Initially hidden */
         justify-content: center;
         align-items: center;
         z-index: 1000;
-        overflow: auto;
-        padding: 0;
+        overflow: auto; /* Allow scrolling if content is large */
+        padding: 0; /* Remove padding here */
     }
 
-    #simulationArea .simulation-content-wrapper {
-        background-color: white;
-        color: #333;
-        padding: 0;
+    #simulationArea .simulation-content-wrapper { /* Added wrapper for the actual content */
+        background-color: white; /* Modal background */
+        color: #333; /* Text color inside modal */
+        padding: 0; /* Remove padding here, content will manage its spacing */
         border-radius: 10px;
+        /* --- 기본 팝업 크기 (화면 60%) --- */
         width: 60vw;
         height: 60vh;
-        max-width: 95vw;
-        max-height: 95vh;
-        overflow: hidden;
-        position: relative;
+        max-width: 95vw; /* Ensure it doesn't exceed viewport width */
+        max-height: 95vh; /* Ensure it doesn't exceed viewport height */
+        /* --- 기본 팝업 크기 끝 --- */
+        overflow: hidden; /* Hide overflow, content inside will manage scrolling */
+        position: relative; /* For close button positioning */
         box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        display: flex;
+        display: flex; /* Center content inside wrapper */
         flex-direction: column;
         justify-content: center;
         align-items: center;
-         transition: all 0.3s ease;
+         transition: all 0.3s ease; /* Add smooth transition */
     }
 
+    /* Style for the wrapper when in fullscreen mode */
     #simulationArea .simulation-content-wrapper.is-fullscreen {
-        width: 100vw !important;
-        height: 100vh !important;
+        width: 100vw !important; /* Force full width */
+        height: 100vh !important; /* Force full height */
         max-width: 100vw !important;
         max-height: 100vh !important;
-        border-radius: 0 !important;
-        padding: 0 !important;
-        background-color: black !important;
-        justify-content: center !important;
-        align-items: center !important;
+        border-radius: 0 !important; /* Remove border radius */
+        padding: 0 !important; /* Remove padding */
+        background-color: black !important; /* Full screen background */
+        justify-content: center !important; /* Re-center content in full screen */
+        align-items: center !important; /* Re-center content in full screen */
     }
 
 
     #simulationArea .simulation-content {
         text-align: center;
-        width: 100%;
-        height: 100%;
-        display: flex;
+        width: 100%; /* Ensure content takes full width of wrapper */
+        height: 100%; /* Ensure content takes full height of wrapper */
+        display: flex; /* Use flexbox for content alignment */
         flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        overflow: auto;
-        padding: 20px;
+        justify-content: center; /* Center content vertically */
+        align-items: center; /* Center content horizontally */
+        overflow: auto; /* Add scroll if content exceeds area */
+        padding: 20px; /* Add padding inside the content area */
     }
 
 
     #simulationArea img,
     #simulationArea video {
         max-width: 100%;
-        max-height: 100%;
-        object-fit: contain;
-        margin: 0;
+        max-height: 100%; /* Allow media to take full height if needed */
+        object-fit: contain; /* Maintain aspect ratio */
+        margin: 0; /* Remove margin */
     }
 
     #simulationArea audio {
-        margin-top: 20px;
+        margin-top: 20px; /* Space below audio controls if they appear */
     }
 
     #simulationArea .simulation-content p {
-        margin: 0;
-         word-break: break-word;
+        margin: 0; /* Remove margin */
+         word-break: break-word; /* Prevent long words from overflowing */
     }
 
     .close-simulation {
@@ -118,21 +123,28 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        line-height: 1;
+        line-height: 1; /* Center the X */
     }
 
     .fullscreen-simulation {
         position: absolute;
         top: 10px;
-        right: 50px;
-        background: #3498db;
+        right: 50px; /* Position to the left of the close button */
+        background: #3498db; /* Blue color */
         color: white;
         border: none;
-        border-radius: 8px;
-        padding: 5px 10px;
+        border-radius: 8px; /* Match other buttons */
+        padding: 5px 10px; /* Smaller padding */
         font-size: 14px;
         cursor: pointer;
         z-index: 1001;
+    }
+
+
+    /* Hide buttons in fullscreen mode */
+    #simulationArea .simulation-content-wrapper.is-fullscreen .close-simulation,
+    #simulationArea .simulation-content-wrapper.is-fullscreen .fullscreen-simulation {
+        display: none !important;
     }
 
 
@@ -149,7 +161,7 @@
         border-radius: 4px;
         border: 1px solid #ccc;
         margin-top: 5px;
-        box-sizing: border-box;
+        box-sizing: border-box; /* Include border in size */
     }
 
   </style>
@@ -159,10 +171,7 @@
   <h1>📦 박스형 블록 UI (Enhanced)</h1>
   <div class="controls">
     <button onclick="addStep()">+ 단계 추가</button>
-    <button onclick="saveScenario()">시나리오 저장</button>
-    <button onclick="loadScenario()">시나리오 불러오기</button>
-    <button onclick="exportScenario()">JSON 다운로드</button>
-    <button onclick="startSimulation()">시뮬레이션 시작</button>
+    <button onclick="saveScenario()">시나리오 (브라우저) 저장</button> <button onclick="loadScenario()">시나리오 (브라우저) 불러오기</button> <button onclick="downloadScenarioJson()">시나리오 JSON 다운로드</button> <input type="text" id="scenarioJsonUrl" placeholder="JSON 파일 URL 입력"> <button onclick="loadScenarioFromJsonUrl()">JSON URL에서 불러오기</button> <button onclick="startSimulation()">시뮬레이션 시작</button>
       <label for="repeatMode">반복:</label>
       <select id="repeatMode">
         <option value="infinite">무한</option>
@@ -181,43 +190,816 @@
   <div id="timeline"></div>
 
   <script>
-    // 기존 코드 생략 (addStep, initPalette, initDropZones, initPreviews, updateSayPreview, updateShowPreview, updatePreview, deleteStep, updateStepNumbers, saveScenario, loadScenario, startSimulation, executeSimulationStep, stopSimulation, goFullscreen, exitFullscreen 등)
+    const colors = ['#000000','#FF0000','#FFA500','#FFFF00','#008000','#00FFFF','#0000FF','#800080','#FFC0CB','#A52A2A', '#FFFFFF', '#CCCCCC', '#808080']; // 배경색 추가
+    let stepCount = 0;
+    const stepContainer = document.getElementById('stepContainer');
+    const simulationArea = document.getElementById('simulationArea');
+    const simulationContent = simulationArea.querySelector('.simulation-content');
+    const simulationContentWrapper = simulationArea.querySelector('.simulation-content-wrapper'); // Get the wrapper
+    let currentSimulationStep = 0;
+    let simulationInterval;
+    let currentAudio = null;
+    let currentMedia = null; // Track current media element for stopping video
 
-    // JSON 다운로드 함수 추가
-    function exportScenario() {
-      const stepsData = [];
-      document.querySelectorAll('.step').forEach(step => {
-        const data = {
-          sayText: step.querySelector('.say-text').value,
-          saySize: parseInt(step.querySelector('.say-size').value),
-          sayFont: step.querySelector('.say-font').value,
-          textAnim: step.querySelector('.text-anim').value,
-          sayColor: step.querySelector('.say-color-value').value,
-          sayBold: step.querySelector('.say-bold').checked,
-          sayBlink: step.querySelector('.say-blink').checked,
-          showMedia: null,
-          showBgColor: step.querySelector('.show-bg-color-value').value,
-          audio: null,
-          duration: parseInt(step.querySelector('.step-duration').value)
-        };
-        const imgInput = step.querySelector('.show-media');
-        if (imgInput.files[0]) {
-          data.showMedia = { name: imgInput.files[0].name, type: imgInput.files[0].type };
+    let repeatMode = 'infinite'; // Default
+    let repeatCount = 0;
+    let currentRepeat = 0;
+
+    let isFullscreenMode = false; // Track fullscreen state
+
+    // Variable to hold the scenario data loaded from JSON URL if applicable
+    // This is needed so executeSimulationStep can potentially use URLs from JSON
+    let scenarioDataFromUrl = null;
+
+
+    // Initialize Sortable and add listener for end of drag-and-drop
+    new Sortable(stepContainer, {
+        handle: '.step-header',
+        animation: 150,
+        onEnd: function (evt) {
+            updateStepNumbers(); // Update numbers after drop
         }
-        const audInput = step.querySelector('.audio-file');
-        if (audInput.files[0]) {
-          data.audio = { name: audInput.files[0].name, type: audInput.files[0].type };
+    });
+
+     // Add event listener for repeat mode change
+    document.getElementById('repeatMode').addEventListener('change', function() {
+        repeatMode = this.value;
+        if (repeatMode !== 'infinite') {
+            repeatCount = parseInt(repeatMode);
         }
-        stepsData.push(data);
-      });
-      const blob = new Blob([JSON.stringify(stepsData, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'scenario.json';
-      a.click();
-      URL.revokeObjectURL(url);
+        console.log('Repeat mode set to:', repeatMode, 'Count:', repeatCount);
+    });
+
+    // --- Fullscreen Functions ---
+    function goFullscreen() {
+        simulationContentWrapper.classList.add('is-fullscreen');
+        isFullscreenMode = true;
+        // In fullscreen, the background should be controlled by the step background color
+        simulationArea.style.backgroundColor = 'transparent'; // Make overlay transparent in fullscreen
+
+         // Re-apply background color to the wrapper in case it was cleared
+         // This is handled within executeSimulationStep as well
     }
+
+    function exitFullscreen() {
+        simulationContentWrapper.classList.remove('is-fullscreen');
+        isFullscreenMode = false;
+        // Restore overlay background color
+        simulationArea.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+
+         // Restore simulation content wrapper background if it was cleared
+        if (currentSimulationStep > 0) { // Only try to get previous step if not the very first step
+             const steps = stepContainer.querySelectorAll('.step');
+             if(steps.length > 0 && currentSimulationStep -1 < steps.length) {
+                  const previousStep = steps[currentSimulationStep - 1]; // Get the previous step's data element
+                   if (previousStep) { // Ensure the element exists
+                        simulationContentWrapper.style.backgroundColor = previousStep.querySelector('.show-bg-color-value').value;
+                   } else {
+                        simulationContentWrapper.style.backgroundColor = 'white'; // Default if element not found
+                   }
+             } else {
+                  simulationContentWrapper.style.backgroundColor = 'white'; // Default if no steps or first step
+             }
+
+        } else {
+             // If at the beginning or no steps, set to default modal background
+             simulationContentWrapper.style.backgroundColor = 'white'; // Default if no steps or first step
+        }
+
+    }
+
+    // Exit fullscreen on Escape key press
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && isFullscreenMode) {
+            stopSimulation(); // Stop simulation and exit fullscreen
+        }
+    });
+    // --- End Fullscreen Functions ---
+
+
+    function addStep(data) {
+      stepCount++;
+      const d = data || {};
+      const stepDiv = document.createElement('div');
+      stepDiv.className = 'step';
+      stepDiv.innerHTML = `
+        <div class="step-header">
+          단계 ${stepCount}
+          <button class="delete-btn" onclick="deleteStep(this)">삭제</button>
+        </div>
+        <div class="block-row">
+          <div class="block-col">
+            <label>말하기</label>
+            <input type="text" class="say-text" value="${d.sayText||''}" placeholder="텍스트 입력"><br>
+            <label>크기(px)</label>
+            <input type="number" class="say-size" min="10" max="100" value="${d.saySize||16}"><br>
+            <select class="say-font">
+              <option value="Arial">Arial</option>
+              <option value="Courier New">Courier New</option>
+              <option value="Georgia">Georgia</option>
+              <option value="Roboto, sans-serif">Roboto</option>
+              <option value="Noto Sans KR, sans-serif">NotoSansKR</option>
+              <option value="Nanum Gothic, sans-serif">NanumGothic</option>
+            </select><br>
+            <select class="text-anim">
+              <option value="none">애니메이션 없음</option>
+              <option value="typing">타이핑</option>
+              <option value="slide">슬라이드 인</option>
+            </select><br>
+            <div class="color-palette say-palette"></div>
+            <input type="hidden" class="say-color-value" value="${d.sayColor||'#000000'}">
+            <label><input type="checkbox" class="say-bold" ${d.sayBold?'checked':''}> 진하게</label><br>
+            <label><input type="checkbox" class="say-blink" ${d.sayBlink?'checked':''}> 반짝임</label>
+            <div class="preview say-preview"></div>
+          </div>
+          <div class="block-col show-block"> <label>표시</label>
+            <div class="drop-zone">
+              이미지/영상 드롭 또는 클릭
+              <input type="file" class="show-media" accept="image/*,video/*" style="display:none"> </div>
+            <div class="preview show-media-preview"></div>
+            <label>배경색</label> <div class="color-palette show-bg-palette"></div> <input type="hidden" class="show-bg-color-value" value="${d.showBgColor||'#FFFFFF'}"> </div>
+          <div class="block-col">
+            <label>오디오</label>
+            <div class="drop-zone">
+              음원 드롭 또는 클릭
+              <input type="file" class="audio-file" accept="audio/*" style="display:none">
+            </div>
+            <div class="preview audio-preview"></div>
+          </div>
+          <div class="block-col">
+            <label>시간(초)</label>
+            <input type="number" class="step-duration" min="1" value="${d.duration||5}">
+          </div>
+        </div>`;
+      stepContainer.appendChild(stepDiv);
+      stepDiv.querySelector('.say-font').value = d.sayFont||'Arial';
+      initPalette(stepDiv.querySelector('.say-palette'), 'say-color-value');
+       initPalette(stepDiv.querySelector('.show-bg-palette'), 'show-bg-color-value', updateShowPreview); // Init background color palette
+      initDropZones(stepDiv);
+      initPreviews(stepDiv);
+      updateStepNumbers(); // Update numbers when a new step is added
+    }
+
+    function initPalette(container, valueClass, updateFn = updateSayPreview) { // Added optional updateFn
+      const stepDiv = container.closest('.step');
+      colors.forEach(c=>{
+        const sw = document.createElement('div'); sw.className='swatch'; sw.style.background=c; sw.dataset.color=c;
+        if(stepDiv.querySelector('.'+valueClass).value===c) sw.classList.add('selected');
+        sw.addEventListener('click',()=>{
+          container.querySelectorAll('.swatch').forEach(x=>x.classList.remove('selected'));
+          sw.classList.add('selected');
+          stepDiv.querySelector('.'+valueClass).value=c;
+          updateFn(stepDiv); // Call the appropriate update function
+        });
+        container.appendChild(sw);
+      });
+    }
+
+    function initDropZones(stepDiv) {
+      stepDiv.querySelectorAll('.drop-zone').forEach(zone=>{
+        const input = zone.querySelector('input[type=file]');
+        zone.addEventListener('click',()=>input.click());
+        zone.addEventListener('dragover',e=>{ e.preventDefault(); zone.classList.add('dragover'); });
+        zone.addEventListener('dragleave',()=>zone.classList.remove('dragover'));
+        zone.addEventListener('drop',e=>{ e.preventDefault(); zone.classList.remove('dragover'); input.files=e.dataTransfer.files; updatePreview(zone.closest('.step')); });
+        input.addEventListener('change',()=>updatePreview(zone.closest('.step')));
+      });
+    }
+
+    function initPreviews(stepDiv) {
+      stepDiv.querySelector('.say-text').addEventListener('input',()=>updateSayPreview(stepDiv));
+      ['say-size','say-font','say-color-value','say-bold','say-blink','text-anim'].forEach(cls=>{
+        stepDiv.querySelector('.'+cls).addEventListener('change',()=>updateSayPreview(stepDiv));
+      });
+      // Update show preview when background color changes
+      stepDiv.querySelector('.show-bg-color-value').addEventListener('change', () => updateShowPreview(stepDiv));
+      updateSayPreview(stepDiv);
+      updatePreview(stepDiv); // This now handles both media and background color for the show block
+    }
+
+    function updateSayPreview(stepDiv) {
+      const preview = stepDiv.querySelector('.say-preview'); preview.innerHTML='';
+      const text = stepDiv.querySelector('.say-text').value; if(!text) return;
+      const p = document.createElement('p'); p.textContent = text;
+      p.style.fontFamily = stepDiv.querySelector('.say-font').value;
+      p.style.color = stepDiv.querySelector('.say-color-value').value;
+      p.style.fontWeight = stepDiv.querySelector('.say-bold').checked ? 'bold' : '';
+      p.style.fontSize = stepDiv.querySelector('.say-size').value + 'px';
+      if(stepDiv.querySelector('.say-blink').checked) p.style.animation='blink 1s step-start infinite';
+      const anim = stepDiv.querySelector('.text-anim').value;
+      if(anim==='typing') {
+         p.style.overflow = 'hidden';
+         p.style.whiteSpace = 'nowrap';
+         p.style.borderRight = '2px solid';
+         p.style.animation = 'typing ' + (text.length * 0.1) + 's steps(' + text.length + '), blink .7s step-end infinite';
+         p.style.animationFillMode = 'forwards';
+      }
+      if(anim==='slide') {
+         p.style.animation = (p.style.animation ? p.style.animation + ', ' : '') + 'slide-in 0.5s ease-out';
+         p.style.animationFillMode = 'forwards';
+      }
+      preview.appendChild(p);
+    }
+
+     function updateShowPreview(stepDiv) {
+        // 이미지/영상 미리보기
+        const mediaPrev = stepDiv.querySelector('.show-media-preview');
+        mediaPrev.innerHTML = '';
+        const mediaInput = stepDiv.querySelector('.show-media');
+        if (mediaInput.files[0]) {
+            const file = mediaInput.files[0];
+            const url = URL.createObjectURL(file);
+            let mediaElement;
+            if (file.type.startsWith('image/')) {
+                mediaElement = document.createElement('img');
+                mediaElement.src = url;
+            } else if (file.type.startsWith('video/')) {
+                mediaElement = document.createElement('video');
+                mediaElement.src = url;
+                mediaElement.controls = true;
+            }
+            if (mediaElement) {
+                mediaPrev.appendChild(mediaElement);
+                const btn = document.createElement('button');
+                btn.textContent = 'X';
+                btn.className = 'clear-btn';
+                btn.addEventListener('click', () => {
+                    mediaInput.value = '';
+                    updatePreview(stepDiv);
+                });
+                mediaPrev.appendChild(btn);
+            }
+        }
+
+        // 배경색 업데이트 (미리보기 영역에 직접 적용은 아님, 데이터만 저장)
+        const showBlock = stepDiv.querySelector('.show-block'); // Get the show block
+        const bgColorInput = stepDiv.querySelector('.show-bg-color-value');
+         // Add a small swatch showing the selected color
+        const colorSwatch = document.createElement('div');
+        colorSwatch.style.width = '20px';
+        colorSwatch.style.height = '20px';
+        colorSwatch.style.backgroundColor = bgColorInput.value;
+        colorSwatch.style.border = '1px solid #ccc';
+        colorSwatch.style.marginTop = '5px';
+         colorSwatch.style.borderRadius = '4px';
+         const existingSwatch = showBlock.querySelector('.bg-color-swatch-preview');
+         if(existingSwatch) existingSwatch.remove();
+         colorSwatch.className = 'bg-color-swatch-preview';
+         showBlock.appendChild(colorSwatch);
+    }
+
+
+    function updatePreview(stepDiv) {
+      // This function now just calls the specific update functions
+      updateSayPreview(stepDiv);
+      updateShowPreview(stepDiv);
+
+      // 오디오 미리보기 (remains the same)
+      const audioPrev = stepDiv.querySelector('.audio-preview'); audioPrev.innerHTML='';
+      const audioInput = stepDiv.querySelector('.audio-file'); if(audioInput.files[0]){
+        const url=URL.createObjectURL(audioInput.files[0]); const aud=document.createElement('audio'); aud.src=url; aud.controls=true; audioPrev.appendChild(aud);
+        const btn=document.createElement('button'); btn.textContent='X'; btn.className='clear-btn';
+        btn.addEventListener('click',()=>{ audioInput.value=''; updatePreview(stepDiv); }); audioPrev.appendChild(btn);
+      }
+    }
+
+
+    function deleteStep(btn){
+        btn.closest('.step').remove();
+        updateStepNumbers(); // Update step numbers after deletion
+    }
+
+    function updateStepNumbers() {
+        const steps = stepContainer.querySelectorAll('.step');
+        steps.forEach((step, index) => {
+            step.querySelector('.step-header').childNodes[0].nodeValue = `단계 ${index + 1}`;
+        });
+        stepCount = steps.length;
+    }
+
+
+    function saveScenario() {
+        const stepsData = [];
+        const steps = stepContainer.querySelectorAll('.step');
+
+        steps.forEach(step => {
+            const sayText = step.querySelector('.say-text').value;
+            const saySize = step.querySelector('.say-size').value;
+            const sayFont = step.querySelector('.say-font').value;
+            const textAnim = step.querySelector('.text-anim').value;
+            const sayColor = step.querySelector('.say-color-value').value;
+            const sayBold = step.querySelector('.say-bold').checked;
+            const sayBlink = step.querySelector('.say-blink').checked;
+
+            const showMediaInput = step.querySelector('.show-media');
+            const showMediaFile = showMediaInput.files[0];
+             // NOTE: Saving only name/type. File CONTENT is NOT saved in JSON.
+             // If using this JSON on another device/page, you need to ensure media files
+             // are hosted online and their URLs are stored here instead of just name/type.
+            const showMedia = showMediaFile ? { name: showMediaFile.name, type: showMediaFile.type /*, url: '...' add URL here if hosted */ } : null;
+            const showBgColor = step.querySelector('.show-bg-color-value').value;
+
+
+            const audioInput = step.querySelector('.audio-file');
+            const audioFile = audioInput.files[0];
+             // NOTE: Saving only name/type. File CONTENT is NOT saved in JSON.
+             // If using this JSON on another device/page, you need to ensure audio files
+             // are hosted online and their URLs are stored here instead of just name/type.
+            const audio = audioFile ? { name: audioFile.name, type: audioFile.type /*, url: '...' add URL here if hosted */ } : null;
+
+
+            const duration = parseInt(step.querySelector('.step-duration').value); // Ensure duration is a number
+
+            stepsData.push({
+                sayText,
+                saySize,
+                sayFont,
+                textAnim,
+                sayColor,
+                sayBold,
+                sayBlink,
+                showMedia,
+                showBgColor,
+                audio,
+                duration
+            });
+        });
+
+        localStorage.setItem('temiScenario', JSON.stringify(stepsData));
+        alert('시나리오 (브라우저에) 저장되었습니다!');
+        console.log('Saved Scenario to localStorage:', stepsData);
+    }
+
+    function loadScenario() {
+        const savedScenario = localStorage.getItem('temiScenario');
+        if (savedScenario) {
+            const stepsData = JSON.parse(savedScenario);
+            stepContainer.innerHTML = ''; // Clear current steps
+            stepCount = 0; // Reset step count
+
+            stepsData.forEach(data => {
+                addStep(data); // Add step with loaded data
+
+                // Re-populate file names for preview (cannot load actual files from localStorage)
+                const lastStep = stepContainer.querySelector('.step:last-child');
+                 if(data.showMedia) {
+                     const mediaPrev = lastStep.querySelector('.show-media-preview');
+                     mediaPrev.innerHTML = `<div>${data.showMedia.name} (${data.showMedia.type})</div>`;
+                     const btn = document.createElement('button');
+                     btn.textContent = 'X'; btn.className = 'clear-btn';
+                     btn.addEventListener('click', () => { lastStep.querySelector('.show-media').value = ''; updatePreview(lastStep); });
+                     mediaPrev.appendChild(btn);
+                 }
+                 if(data.audio) {
+                     const audioPrev = lastStep.querySelector('.audio-preview');
+                     audioPrev.innerHTML = `<div>${data.audio.name} (${data.audio.type})</div>`;
+                     const btn = document.createElement('button');
+                     btn.textContent = 'X'; btn.className = 'clear-btn';
+                     btn.addEventListener('click', () => { lastStep.querySelector('.audio-file').value = ''; updatePreview(lastStep); });
+                     audioPrev.appendChild(btn);
+                 }
+                 // Re-initialize background color preview swatch
+                 updateShowPreview(lastStep);
+            });
+            updateStepNumbers(); // Ensure step numbers are correct after loading
+            alert('시나리오 (브라우저에서) 불러왔습니다!');
+        } else {
+            alert('브라우저에 저장된 시나리오가 없습니다.');
+        }
+    }
+
+     // --- New: Download Scenario as JSON ---
+    function downloadScenarioJson() {
+        const stepsData = [];
+        const steps = stepContainer.querySelectorAll('.step');
+
+        steps.forEach(step => {
+            const sayText = step.querySelector('.say-text').value;
+            const saySize = step.querySelector('.say-size').value;
+            const sayFont = step.querySelector('.say-font').value;
+            const textAnim = step.querySelector('.text-anim').value;
+            const sayColor = step.querySelector('.say-color-value').value;
+            const sayBold = step.querySelector('.say-bold').checked;
+            const sayBlink = step.querySelector('.say-blink').checked;
+
+            const showMediaInput = step.querySelector('.show-media');
+            const showMediaFile = showMediaInput.files[0];
+             // IMPORTANT: File CONTENT is NOT included in JSON.
+             // If using this JSON on another device/page, you need to ensure media files
+             // are hosted online and their URLs are stored here instead of just name/type.
+            const showMedia = showMediaFile ? { name: showMediaFile.name, type: showMediaFile.type /*, url: '...' add URL here if hosted */ } : null;
+            const showBgColor = step.querySelector('.show-bg-color-value').value;
+
+            const audioInput = step.querySelector('.audio-file');
+            const audioFile = audioInput.files[0];
+             // IMPORTANT: File CONTENT is NOT included in JSON.
+             // If using this JSON on another device/page, you need to ensure audio files
+             // are hosted online and their URLs are stored here instead of just name/type.
+            const audio = audioFile ? { name: audioFile.name, type: audioFile.type /*, url: '...' add URL here if hosted */ } : null;
+
+            const duration = parseInt(step.querySelector('.step-duration').value); // Ensure duration is a number
+
+            stepsData.push({
+                sayText,
+                saySize,
+                sayFont,
+                textAnim,
+                sayColor,
+                sayBold,
+                sayBlink,
+                showMedia,
+                showBgColor,
+                audio,
+                duration
+            });
+        });
+
+        const repeatMode = document.getElementById('repeatMode').value;
+        const repeatCount = repeatMode === 'infinite' ? -1 : parseInt(repeatMode); // -1 for infinite
+
+        const scenarioDataWithRepeat = {
+            steps: stepsData,
+            repeatMode: repeatMode,
+            repeatCount: repeatCount
+        };
+
+
+        const scenarioJson = JSON.stringify(scenarioDataWithRepeat, null, 2); // null, 2 for pretty printing
+        const blob = new Blob([scenarioJson], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'temi_scenario.json'; // Default filename
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+
+        URL.revokeObjectURL(url); // Clean up
+        alert('시나리오 JSON 파일을 다운로드합니다.');
+    }
+
+    // --- New: Load Scenario from JSON URL ---
+    function loadScenarioFromJsonUrl() {
+        const jsonUrlInput = document.getElementById('scenarioJsonUrl');
+        const jsonUrl = jsonUrlInput.value;
+        if (!jsonUrl) {
+            alert('JSON 파일 URL을 입력해주세요.');
+            return;
+        }
+
+        // Basic URL validation (optional but good practice)
+        try {
+            new URL(jsonUrl);
+        } catch (_) {
+            alert('유효하지 않은 URL 형식입니다.');
+            return;
+        }
+
+
+        fetch(jsonUrl)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(loadedScenarioDataWithRepeat => { // Renamed variable to avoid conflict
+                 scenarioDataFromUrl = loadedScenarioDataWithRepeat; // Store the loaded data globally
+
+                // Clear current steps
+                stepContainer.innerHTML = '';
+                stepCount = 0;
+
+                const stepsData = scenarioDataFromUrl.steps;
+                const loadedRepeatMode = scenarioDataFromUrl.repeatMode || 'infinite'; // Default to infinite if not in JSON
+                const loadedRepeatCount = scenarioDataFromUrl.repeatCount || (loadedRepeatMode === 'infinite' ? -1 : parseInt(loadedRepeatMode));
+
+                // Update UI with loaded repeat settings
+                const repeatModeSelect = document.getElementById('repeatMode');
+                 // Find the option with the matching value or default
+                 let foundOption = false;
+                 for(let i=0; i < repeatModeSelect.options.length; i++){
+                     if(repeatModeSelect.options[i].value === loadedRepeatMode){
+                         repeatModeSelect.value = loadedRepeatMode;
+                         foundOption = true;
+                         break;
+                     }
+                 }
+                 if(!foundOption && loadedRepeatMode !== 'infinite'){
+                      // If a specific repeat count (e.g., 5x) was saved but not in the dropdown,
+                      // we might need to add it or handle it differently.
+                      // For simplicity here, we'll just default to infinite if not found.
+                      repeatModeSelect.value = 'infinite';
+                 }
+
+
+                 repeatMode = repeatModeSelect.value; // Update script variables
+                 repeatCount = repeatMode === 'infinite' ? -1 : parseInt(repeatMode); // -1 for infinite
+
+
+
+                // Add steps from loaded data
+                stepsData.forEach(data => {
+                     // When loading from JSON, media/audio info is available but not the file content itself.
+                     // The addStep function is designed to handle the UI creation with placeholder/names.
+                    addStep(data);
+                });
+                updateStepNumbers(); // Ensure step numbers are correct
+                alert('JSON 파일에서 시나리오를 성공적으로 불러왔습니다!');
+                console.log('Loaded Scenario from URL:', scenarioDataFromUrl);
+
+                 // IMPORTANT: Files referenced in JSON (showMedia, audio) using only name/type
+                 // will NOT automatically load and display/play UNLESS the JSON includes URLs
+                 // and the executeSimulationStep function is updated to use those URLs.
+                 // The current executeSimulationStep prioritizes file input files if available.
+                 // For loading from JSON URL to work fully with media, you need to:
+                 // 1. Ensure media files are publicly hosted (e.g., on GitHub Pages).
+                 // 2. Update downloadScenarioJson to save the public URLs in the JSON.
+                 // 3. Update executeSimulationStep to use the URLs from `scenarioDataFromUrl.steps`
+                 //    if no file is selected in the corresponding input on the admin page.
+
+            })
+            .catch(error => {
+                console.error('Error loading scenario from URL:', error);
+                alert('JSON 파일 불러오기에 실패했습니다. URL을 확인하거나 CORS 문제가 아닌지 확인해주세요.');
+            });
+    }
+     // --- End Load Scenario from JSON URL ---
+
+
+    function startSimulation() {
+        const steps = stepContainer.querySelectorAll('.step');
+        if (steps.length === 0) {
+            // If no steps are in the UI, try to use data loaded from URL if available
+            if (scenarioDataFromUrl && scenarioDataFromUrl.steps.length > 0) {
+                 // Use data loaded from URL
+                 currentSimulationStep = 0;
+                 currentRepeat = 0;
+                 repeatMode = scenarioDataFromUrl.repeatMode || 'infinite';
+                 repeatCount = scenarioDataFromUrl.repeatCount || (repeatMode === 'infinite' ? -1 : parseInt(repeatMode));
+
+                 simulationArea.style.display = 'flex';
+                 executeSimulationStep(); // Start with loaded data
+                 return; // Exit the function
+            } else {
+                alert('시뮬레이션을 시작할 단계가 없습니다. 단계를 추가하거나 JSON에서 불러와 주세요.');
+                return;
+            }
+        }
+
+         // If steps are in the UI, use them for simulation (prioritize UI state)
+        simulationArea.style.display = 'flex'; // Show simulation area (now a modal overlay)
+        currentSimulationStep = 0;
+        currentRepeat = 0; // Reset repeat counter
+
+        // Get repeat mode and count from current UI selection
+        repeatMode = document.getElementById('repeatMode').value;
+        if (repeatMode !== 'infinite') {
+            repeatCount = parseInt(repeatMode);
+        } else {
+            repeatCount = -1; // Use -1 to represent infinite internally
+        }
+
+        executeSimulationStep(); // Start with UI data
+    }
+
+    function executeSimulationStep() {
+         // Clear previous media if any
+         if (currentMedia) {
+             if (currentMedia.tagName === 'VIDEO') {
+                 currentMedia.pause();
+             }
+             currentMedia.remove();
+             currentMedia = null;
+         }
+         // Clear previous audio if any
+         if (currentAudio) {
+             currentAudio.pause();
+             currentAudio.remove();
+             currentAudio = null;
+         }
+
+        // Determine which data source to use: UI elements or loaded JSON data
+        const steps = stepContainer.querySelectorAll('.step');
+        const useUiData = steps.length > 0;
+        const currentStepData = useUiData ? steps[currentSimulationStep] : (scenarioDataFromUrl && scenarioDataFromUrl.steps.length > currentSimulationStep ? scenarioDataFromUrl.steps[currentSimulationStep] : null);
+
+        if (!currentStepData) {
+             // Should not happen if startSimulation logic is correct, but as a safeguard
+             console.error("No step data available for simulation.");
+             stopSimulation();
+             return;
+        }
+
+
+        // --- Check for end of sequence or repeat ---
+        if (currentSimulationStep >= (useUiData ? steps.length : scenarioDataFromUrl.steps.length)) {
+            // Finished one full sequence of steps
+            currentRepeat++; // Increment repeat counter
+
+            // Use repeat settings based on which data is being used
+            const currentRepeatMode = useUiData ? document.getElementById('repeatMode').value : (scenarioDataFromUrl ? scenarioDataFromUrl.repeatMode : 'infinite');
+            const currentRepeatCount = currentRepeatMode === 'infinite' ? -1 : parseInt(currentRepeatMode);
+
+
+            if (currentRepeatMode === 'infinite' || currentRepeat < currentRepeatCount) {
+                // If infinite or more repeats are needed, reset to the first step
+                currentSimulationStep = 0;
+                 // Optional: Briefly clear screen or show a transition before repeating
+                 simulationContent.innerHTML = '';
+                 // Background color is set per step, but clear for transition
+                 simulationContentWrapper.style.backgroundColor = isFullscreenMode ? 'black' : 'white'; // Keep background in fullscreen repeat
+                 simulationArea.style.backgroundColor = isFullscreenMode ? 'black' : 'rgba(0, 0, 0, 0.7)';
+
+
+                 // Delay before starting the first step of the next repeat cycle
+                 simulationInterval = setTimeout(executeSimulationStep, 500); // 500ms delay before repeating
+                return; // Stop current execution cycle, new one will start after delay
+            } else {
+                // Finished all required repeats
+                stopSimulation();
+                return;
+            }
+        }
+         // --- End Check ---
+
+
+         // Get duration
+         const duration = useUiData ? parseInt(currentStepData.querySelector('.step-duration').value) * 1000 : parseInt(currentStepData.duration) * 1000;
+
+
+        simulationContent.innerHTML = ''; // Clear previous content
+        // Apply background color - apply to simulationArea in fullscreen, wrapper otherwise
+         const currentBgColor = useUiData ? currentStepData.querySelector('.show-bg-color-value').value : currentStepData.showBgColor;
+         if (isFullscreenMode) {
+             simulationArea.style.backgroundColor = currentBgColor;
+             simulationContentWrapper.style.backgroundColor = 'transparent'; // Make wrapper transparent
+         } else {
+             simulationContentWrapper.style.backgroundColor = currentBgColor;
+             simulationArea.style.backgroundColor = 'rgba(0, 0, 0, 0.7)'; // Keep overlay background
+         }
+
+
+        // Display "말하기" content
+        const sayText = useUiData ? currentStepData.querySelector('.say-text').value : currentStepData.sayText;
+         if (sayText) {
+            const p = document.createElement('p');
+            p.textContent = sayText;
+            p.style.fontFamily = useUiData ? currentStepData.querySelector('.say-font').value : currentStepData.sayFont;
+            p.style.color = useUiData ? currentStepData.querySelector('.say-color-value').value : currentStepData.sayColor;
+            p.style.fontWeight = useUiData ? currentStepData.querySelector('.say-bold').checked ? 'bold' : '' : currentStepData.sayBold ? 'bold' : '';
+            p.style.fontSize = useUiData ? currentStepData.querySelector('.say-size').value + 'px' : currentStepData.saySize + 'px';
+
+            const anim = useUiData ? currentStepData.querySelector('.text-anim').value : currentStepData.textAnim;
+             if(anim === 'typing') {
+                 p.style.overflow = 'hidden';
+                 p.style.whiteSpace = 'nowrap';
+                 p.style.borderRight = '2px solid'; // Add cursor effect
+                 p.style.animation = `typing ${sayText.length * 0.1}s steps(${sayText.length}), blink .7s step-end infinite`; // Adjust typing speed based on text length
+                 p.style.animationFillMode = 'forwards'; // Keep the text visible after typing
+             } else if (anim === 'slide') {
+                 p.style.animation = `slide-in 0.5s ease-out`;
+                 p.style.animationFillMode = 'forwards'; // Keep the element visible after sliding
+             }
+
+             if(useUiData ? currentStepData.querySelector('.say-blink').checked : currentStepData.sayBlink) {
+                 p.style.animation = (p.style.animation ? p.style.animation + ', ' : '') + 'blink 1s step-start infinite';
+             }
+             simulationContent.appendChild(p);
+        }
+
+
+        // Display "표시" media (Image/Video) - Handle both UI file input and JSON URL data
+         const showMediaInput = useUiData ? currentStepData.querySelector('.show-media') : null;
+         const mediaDataFromJSON = !useUiData && currentStepData.showMedia ? currentStepData.showMedia : null;
+
+         let mediaSourceUrl = null;
+
+         // Prioritize file input if using UI data and a file is selected
+         if (useUiData && showMediaInput && showMediaInput.files[0]) {
+             mediaSourceUrl = URL.createObjectURL(showMediaInput.files[0]);
+         } else if (mediaDataFromJSON && mediaDataFromJSON.url) {
+             // If using JSON data AND JSON includes a URL for the media
+             mediaSourceUrl = mediaDataFromJSON.url;
+         }
+
+
+         if (mediaSourceUrl) {
+             let mediaType = useUiData && showMediaInput && showMediaInput.files[0] ? showMediaInput.files[0].type : (mediaDataFromJSON ? mediaDataFromJSON.type : null);
+
+              if (mediaType && mediaType.startsWith('image/')) {
+                 currentMedia = document.createElement('img');
+                 currentMedia.src = mediaSourceUrl;
+             } else if (mediaType && mediaType.startsWith('video/')) {
+                 currentMedia = document.createElement('video');
+                 currentMedia.src = mediaSourceUrl;
+                 currentMedia.controls = true; // Show controls for simulation
+                 currentMedia.autoplay = true; // Autoplay video in simulation
+             } else {
+                  // Fallback if type is unknown but URL exists
+                   console.warn("Unknown media type from URL, trying to guess or display raw:", mediaSourceUrl);
+                   // Could try appending based on file extension, or add a generic tag
+                    if (mediaSourceUrl.toLowerCase().match(/\.(jpg|jpeg|png|gif|svg)$/)) {
+                         currentMedia = document.createElement('img');
+                        currentMedia.src = mediaSourceUrl;
+                    } else if (mediaSourceUrl.toLowerCase().match(/\.(mp4|webm|ogg)$/)) {
+                        currentMedia = document.createElement('video');
+                        currentMedia.src = mediaSourceUrl;
+                        currentMedia.controls = true;
+                        currentMedia.autoplay = true;
+                    } else {
+                         const p = document.createElement('p');
+                         p.textContent = `[지원되지 않는 미디어 형식 또는 URL: ${mediaSourceUrl}]`;
+                         p.style.color = 'red';
+                         simulationContent.appendChild(p);
+                    }
+             }
+
+
+             if (currentMedia) {
+                 simulationContent.appendChild(currentMedia);
+             }
+         } else if (currentStepData.showMedia && currentStepData.showMedia.name) {
+              // If no URL was available, but the JSON/UI data had media info (only name/type), show a placeholder
+              const p = document.createElement('p');
+              p.textContent = `[미디어 파일 로드 불가: ${currentStepData.showMedia.name}]`;
+              p.style.color = 'gray';
+              simulationContent.appendChild(p);
+         }
+
+
+        // Play "오디오" content - Handle both UI file input and JSON URL data
+         const audioInput = useUiData ? currentStepData.querySelector('.audio-file') : null;
+         const audioDataFromJSON = !useUiData && currentStepData.audio ? currentStepData.audio : null;
+
+         let audioSourceUrl = null;
+
+         // Prioritize file input if using UI data and a file is selected
+         if (useUiData && audioInput && audioInput.files[0]) {
+             audioSourceUrl = URL.createObjectURL(audioInput.files[0]);
+         } else if (audioDataFromJSON && audioDataFromJSON.url) {
+             // If using JSON data AND JSON includes a URL for the audio
+             audioSourceUrl = audioDataFromJSON.url;
+         }
+
+         if (audioSourceUrl) {
+              currentAudio = new Audio(audioSourceUrl);
+              currentAudio.play();
+               // Optional: display audio controls or a placeholder
+               const p = document.createElement('p');
+               p.textContent = `[오디오 재생 중: ${useUiData && audioInput && audioInput.files[0] ? audioInput.files[0].name : audioDataFromJSON.name || 'URL'}]`;
+               p.style.color = 'gray';
+               simulationContent.appendChild(p);
+         } else if (currentStepData.audio && currentStepData.audio.name) {
+               // If no URL was available, but the JSON/UI data had audio info (only name/type), show a placeholder
+               const p = document.createElement('p');
+               p.textContent = `[오디오 파일 로드 불가: ${currentStepData.audio.name}]`;
+               p.style.color = 'gray';
+               simulationContent.appendChild(p);
+         }
+
+
+
+        // Set timeout for the step duration
+        simulationInterval = setTimeout(() => {
+            currentSimulationStep++;
+            executeSimulationStep(); // Move to the next step
+        }, duration);
+    }
+
+    function stopSimulation() {
+        clearTimeout(simulationInterval);
+        simulationArea.style.display = 'none'; // Hide simulation area
+        simulationContent.innerHTML = ''; // Clear content
+        // Restore background colors when stopping simulation
+        simulationContentWrapper.style.backgroundColor = 'white'; // Default modal background
+        simulationArea.style.backgroundColor = 'rgba(0, 0, 0, 0.7)'; // Default overlay background
+
+
+         if (currentAudio) {
+             currentAudio.pause();
+             currentAudio.remove();
+             currentAudio = null;
+         }
+         if (currentMedia) {
+             if (currentMedia.tagName === 'VIDEO') {
+                 currentMedia.pause();
+             }
+             currentMedia.remove();
+             currentMedia = null;
+         }
+         currentSimulationStep = 0; // Reset step for next simulation start
+         currentRepeat = 0; // Reset repeat count
+
+         // Ensure we exit fullscreen if it was active
+         if (isFullscreenMode) {
+             exitFullscreen(); // Call exitFullscreen to restore styles
+         }
+    }
+
+    // Initial step when the page loads
+    addStep();
   </script>
 </body>
 </html>
