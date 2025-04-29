@@ -1,0 +1,155 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>테미 홍보 프로그램 세팅 화면</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .container { display: flex; flex-direction: row; gap: 20px; }
+    .section { flex: 1; border: 1px solid #ccc; padding: 20px; border-radius: 8px; }
+    .upload-group { margin-bottom: 15px; }
+    .preview-item { margin: 5px 0; padding: 10px; background: #f9f9f9; border: 1px solid #ddd; border-radius: 5px; }
+    button { margin-top: 10px; padding: 10px; }
+  </style>
+</head>
+<body>
+  <h1>테미 홍보 프로그램</h1>
+  <div class="container">
+    <div class="section">
+      <h2>관리자 세팅 화면</h2>
+      <div class="upload-group">
+        <label>이미지 업로드:</label><br>
+        <input type="file" id="imageInput" accept="image/*"><br>
+      </div>
+      <div class="upload-group">
+        <label>영상 업로드:</label><br>
+        <input type="file" id="videoInput" accept="video/mp4,video/webm"><br>
+      </div>
+      <div class="upload-group">
+        <label>YouTube 링크:</label><br>
+        <input type="text" id="youtubeInput" placeholder="https://www.youtube.com/watch?v=..."><br>
+      </div>
+      <div class="upload-group">
+        <label>메시지 입력:</label><br>
+        <input type="text" id="textInput" placeholder="표출할 메시지를 입력하세요."><br>
+      </div>
+      <div class="upload-group">
+        <label>음악 업로드:</label><br>
+        <input type="file" id="musicInput" accept="audio/mp3,audio/wav"><br>
+      </div>
+      <div class="upload-group">
+        <label>표출 시간(초):</label><br>
+        <input type="number" id="durationInput" min="1" value="5"><br>
+      </div>
+      <button onclick="addItem()">추가하기</button>
+      <h3>표출 리스트</h3>
+      <div id="itemList"></div>
+      <button onclick="saveSettings()">저장하기</button>
+      <button onclick="previewAll()">미리보기</button>
+    </div>
+    <div class="section">
+      <h2>출력 화면</h2>
+      <div id="outputScreen" style="text-align: center; min-height: 400px; border: 1px dashed #aaa; padding: 20px;"></div>
+    </div>
+  </div>
+
+  <script>
+    let itemList = [];
+
+    function addItem() {
+      const image = document.getElementById('imageInput').files[0];
+      const video = document.getElementById('videoInput').files[0];
+      const youtube = document.getElementById('youtubeInput').value.trim();
+      const text = document.getElementById('textInput').value.trim();
+      const music = document.getElementById('musicInput').files[0];
+      const duration = document.getElementById('durationInput').value;
+
+      let item = { type: '', src: '', duration: duration };
+
+      if (image) {
+        item.type = 'image';
+        item.src = URL.createObjectURL(image);
+      } else if (video) {
+        item.type = 'video';
+        item.src = URL.createObjectURL(video);
+      } else if (youtube) {
+        item.type = 'youtube';
+        const videoId = youtube.includes('v=') ? youtube.split('v=')[1].split('&')[0] : youtube.split('/').pop();
+        item.src = `https://www.youtube.com/embed/${videoId}`;
+      } else if (text) {
+        item.type = 'text';
+        item.src = text;
+      } else if (music) {
+        item.type = 'music';
+        item.src = URL.createObjectURL(music);
+      } else {
+        alert('업로드 또는 입력 후 추가해주세요.');
+        return;
+      }
+
+      itemList.push(item);
+      renderItemList();
+
+      // 초기화
+      document.getElementById('imageInput').value = '';
+      document.getElementById('videoInput').value = '';
+      document.getElementById('youtubeInput').value = '';
+      document.getElementById('textInput').value = '';
+      document.getElementById('musicInput').value = '';
+      document.getElementById('durationInput').value = '5';
+    }
+
+    function renderItemList() {
+      const listDiv = document.getElementById('itemList');
+      listDiv.innerHTML = '';
+      itemList.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'preview-item';
+        div.innerHTML = `${item.type.toUpperCase()} - ${item.duration}초 <button onclick="removeItem(${index})">삭제</button>`;
+        listDiv.appendChild(div);
+      });
+    }
+
+    function removeItem(index) {
+      itemList.splice(index, 1);
+      renderItemList();
+    }
+
+    function saveSettings() {
+      localStorage.setItem('temiSettings', JSON.stringify(itemList));
+      alert('저장되었습니다.');
+    }
+
+    function previewAll() {
+      let idx = 0;
+      const output = document.getElementById('outputScreen');
+
+      function showNext() {
+        if (idx >= itemList.length) idx = 0;
+        const item = itemList[idx];
+        output.innerHTML = '';
+
+        if (item.type === 'image') {
+          output.innerHTML = `<img src="${item.src}" style="max-width:100%; height:auto;">`;
+        } else if (item.type === 'video') {
+          output.innerHTML = `<video src="${item.src}" controls autoplay style="max-width:100%; height:auto;"></video>`;
+        } else if (item.type === 'youtube') {
+          output.innerHTML = `<iframe width="100%" height="400" src="${item.src}" frameborder="0" allowfullscreen></iframe>`;
+        } else if (item.type === 'text') {
+          output.innerHTML = `<h2>${item.src}</h2>`;
+        } else if (item.type === 'music') {
+          output.innerHTML = `<audio src="${item.src}" controls autoplay></audio>`;
+        }
+
+        idx++;
+        setTimeout(showNext, item.duration * 1000);
+      }
+
+      showNext();
+    }
+  </script>
+</body>
+</html>
